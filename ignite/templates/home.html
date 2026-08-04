@@ -1,10 +1,51 @@
 {% extends 'base.html' %}
+{% block title %}Ignite | Campus services{% endblock %}
 {% block content %}
-<h1>Welcome to Ignite</h1>
-{% if user.is_authenticated %}
-    <p>Hello, {{ user.email }} ({{ user.role }})</p>
-    <a href="{% url 'account_logout' %}">Log out</a>
-{% else %}
-    <a href="{% url 'account_login' %}">Sign in</a>
-{% endif %}
+<section class="ignite-home container-fluid">
+    <div class="ignite-hero">
+        <div class="ignite-hero-copy">
+            <span class="ignite-eyebrow ignite-eyebrow--light"><i class="bi bi-stars"></i> Campus services, connected</span>
+            {% if user.is_authenticated %}
+                <h1>Good to see you, {{ user.get_short_name|default:user.email }}.</h1>
+                <p>Your campus essentials are ready whenever you are.</p>
+                <a class="btn btn-light ignite-hero-button" href="{% url 'dashboard' %}">Open dashboard <i class="bi bi-arrow-right"></i></a>
+            {% else %}
+                <h1>Your campus, all in one place.</h1>
+                <p>Plan your day, find what you need, and stay in sync with your campus through Ignite.</p>
+                <a class="btn btn-light ignite-hero-button" href="{% url 'account_login' %}">Sign in to Ignite <i class="bi bi-arrow-right"></i></a>
+            {% endif %}
+        </div>
+        <div class="ignite-hero-orbit" aria-hidden="true"><span></span><span></span><i class="bi bi-lightning-charge-fill"></i></div>
+    </div>
+
+    <div class="ignite-section-heading" id="services">
+        <div>
+            <span class="ignite-eyebrow"><i class="bi bi-grid-1x2"></i> One portal</span>
+            <h2>Campus services</h2>
+            <p>Everything you need for a smoother day on campus.</p>
+        </div>
+        {% if user.is_authenticated %}<a href="{% url 'dashboard' %}" class="ignite-text-link">View dashboard <i class="bi bi-arrow-right"></i></a>{% endif %}
+    </div>
+
+    <div class="ignite-service-grid">
+        <a class="ignite-service-card tone-indigo" href="{% if user.is_authenticated %}{% url 'dashboard' %}#lhtc-scheduler{% else %}{% url 'account_login' %}{% endif %}">
+            <span class="ignite-service-icon"><i class="bi bi-calendar2-week"></i></span><h3>LHTC Scheduler</h3><p>Plan labs, classes and campus appointments.</p><span class="ignite-card-arrow"><i class="bi bi-arrow-up-right"></i></span>
+        </a>
+        <a class="ignite-service-card tone-rose" href="{% if user.is_authenticated %}{% url 'dashboard' %}#phc{% else %}{% url 'account_login' %}{% endif %}">
+            <span class="ignite-service-icon"><i class="bi bi-heart-pulse"></i></span><h3>PHC</h3><p>Book care and access campus health support.</p><span class="ignite-card-arrow"><i class="bi bi-arrow-up-right"></i></span>
+        </a>
+        <a class="ignite-service-card tone-cyan" href="{% if user.is_authenticated %}{% url 'dashboard' %}#bus{% else %}{% url 'account_login' %}{% endif %}">
+            <span class="ignite-service-icon"><i class="bi bi-bus-front"></i></span><h3>Bus</h3><p>Check live routes and campus shuttle times.</p><span class="ignite-card-arrow"><i class="bi bi-arrow-up-right"></i></span>
+        </a>
+        <a class="ignite-service-card tone-orange" href="{% if user.is_authenticated %}{% url 'dashboard' %}#canteen{% else %}{% url 'account_login' %}{% endif %}">
+            <span class="ignite-service-icon"><i class="bi bi-cup-hot"></i></span><h3>Canteen</h3><p>Browse today’s menu and avoid the queue.</p><span class="ignite-card-arrow"><i class="bi bi-arrow-up-right"></i></span>
+        </a>
+        <a class="ignite-service-card tone-violet" href="{% if user.is_authenticated %}{% url 'dashboard' %}#chatbot{% else %}{% url 'account_login' %}{% endif %}">
+            <span class="ignite-service-icon"><i class="bi bi-chat-square-dots"></i></span><h3>Chatbot</h3><p>Ask Ignite for quick campus answers.</p><span class="ignite-card-arrow"><i class="bi bi-arrow-up-right"></i></span>
+        </a>
+        <a class="ignite-service-card tone-green" href="{% if user.is_authenticated %}{% url 'dashboard' %}#lost-and-found{% else %}{% url 'account_login' %}{% endif %}">
+            <span class="ignite-service-icon"><i class="bi bi-search"></i></span><h3>Lost &amp; Found</h3><p>Report, browse and recover lost items.</p><span class="ignite-card-arrow"><i class="bi bi-arrow-up-right"></i></span>
+        </a>
+    </div>
+</section>
 {% endblock %}

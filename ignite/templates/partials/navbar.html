@@ -1,0 +1,51 @@
+<header class="ignite-header header header-sticky mb-0">
+    <div class="header-container">
+        {% if user.is_authenticated %}
+            <button class="ignite-icon-button ignite-menu-button" type="button" data-sidebar-toggle aria-label="Open navigation">
+                <i class="bi bi-list"></i>
+            </button>
+        {% endif %}
+        <a href="{% url 'home' %}" class="ignite-brand" aria-label="Ignite home">
+            <span class="ignite-brand-mark"><i class="bi bi-lightning-charge-fill"></i></span>
+            <span>ignite<span class="ignite-brand-dot">.</span></span>
+        </a>
+
+        <nav class="ignite-top-nav" aria-label="Main navigation">
+            <a class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}"><i class="bi bi-house-door"></i> Home</a>
+            {% if user.is_authenticated %}
+                <a class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"><i class="bi bi-grid-1x2"></i> Dashboard</a>
+            {% endif %}
+        </nav>
+
+        <div class="ignite-account-actions">
+            {% if user.is_authenticated %}
+                <span class="ignite-user-name"><i class="bi bi-person-circle"></i> {{ user.get_short_name|default:user.email }}</span>
+                <form action="{% url 'account_logout' %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{% url 'account_login' %}">
+                    <button class="ignite-logout-button" type="submit"><i class="bi bi-box-arrow-right"></i><span>Logout</span></button>
+                </form>
+            {% else %}
+                <a class="btn btn-primary ignite-signin-link" href="{% url 'account_login' %}"><i class="bi bi-box-arrow-in-right"></i> Sign in</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+{% if user.is_authenticated %}
+    <div class="ignite-sidebar-backdrop" data-sidebar-backdrop></div>
+    <aside class="ignite-sidebar" data-sidebar aria-label="Campus services">
+        <div class="ignite-sidebar-heading">Campus services</div>
+        <nav class="ignite-sidebar-nav">
+            <a href="{% url 'dashboard' %}#lhtc-scheduler"><i class="bi bi-calendar2-week"></i><span>LHTC Scheduler</span></a>
+            <a href="{% url 'dashboard' %}#phc"><i class="bi bi-heart-pulse"></i><span>PHC</span></a>
+            <a href="{% url 'dashboard' %}#bus"><i class="bi bi-bus-front"></i><span>Bus</span></a>
+            <a href="{% url 'dashboard' %}#canteen"><i class="bi bi-cup-hot"></i><span>Canteen</span></a>
+            <a href="{% url 'dashboard' %}#chatbot"><i class="bi bi-chat-square-dots"></i><span>Chatbot</span></a>
+            <a href="{% url 'dashboard' %}#lost-and-found"><i class="bi bi-search"></i><span>Lost &amp; Found</span></a>
+        </nav>
+        <div class="ignite-sidebar-bottom">
+            <a href="{% url 'home' %}"><i class="bi bi-house-door"></i> Home</a>
+        </div>
+    </aside>
+{% endif %}

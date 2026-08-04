@@ -9,7 +9,7 @@ ALLOWED_DOMAIN = "iiitdmj.ac.in"   # change to your real domain
 
 class InstituteAccountAdapter(DefaultAccountAdapter):
     def is_open_for_signup(self, request):
-        return False  # signup happens only via Google, so this is fine
+        return True  # signup happens only via Google, so this is fine
 
 
 class InstituteSocialAccountAdapter(DefaultSocialAccountAdapter):

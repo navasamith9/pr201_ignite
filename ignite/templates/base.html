@@ -1,15 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    {% load static %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Ignite campus services portal">
     <title>{% block title %}Ignite{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@coreui/coreui@5/dist/css/coreui.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="{% static 'css/ignite.css' %}" rel="stylesheet">
 </head>
-<body>
-    {% include 'partials/navbar.html' %}
+<body class="{% block body_class %}ignite-body{% endblock %}">
+    {% block navigation %}{% include 'partials/navbar.html' %}{% endblock %}
 
-    <main>
+    <main class="ignite-main {% if user.is_authenticated %}ignite-main--signed-in{% endif %}">
         {% block content %}{% endblock %}
     </main>
 
-    {% include 'partials/footer.html' %}
+    {% block footer %}{% include 'partials/footer.html' %}{% endblock %}
+    <script src="https://cdn.jsdelivr.net/npm/@coreui/coreui@5/dist/js/coreui.bundle.min.js"></script>
+    <script src="{% static 'js/ignite.js' %}"></script>
 </body>
 </html>
