@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% load allauth %}
+{% block content %}
+<h1>Sign In</h1>
+<p>Please use your institute Google account to continue.</p>
+<a href="{% provider_login_url 'google' %}" class="btn">
+    Continue with Google
+</a>
+{% endblock %}
