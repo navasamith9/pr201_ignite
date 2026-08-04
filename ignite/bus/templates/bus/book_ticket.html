@@ -1,57 +1,83 @@
 {% extends 'base.html' %}
 
-{% block title %}Book Bus Ticket{% endblock %}
+{% block title %}Book a Bus Ticket | Ignite{% endblock %}
 
 {% block content %}
-<h1>Book Ticket</h1>
-{% if error %}
-    <div class="alert alert-danger">{{ error }}</div>
-{% endif %}
-<form method="post">
-    {% csrf_token %}
-    <div>
-        <label for="travel_date">Travel Date</label>
-        <input type="date" name="travel_date" id="travel_date" value="{{ selected_date }}" required>
+<section class="ignite-bus-page container-fluid">
+    <div class="ignite-page-heading">
+        <div>
+            <span class="ignite-eyebrow"><i class="bi bi-bus-front"></i> Campus transport</span>
+            <h1>Book a bus ticket</h1>
+            <p>Choose a date and direction to see the buses running that day.</p>
+        </div>
+        <a href="{% url 'bus:previous_bookings' %}" class="btn btn-outline-primary"><i class="bi bi-receipt"></i> Previous bookings</a>
     </div>
-    <div>
-        <label for="route">Route</label>
-        <select name="route" id="route" required>
-            <option value="">Select route</option>
-            {% for value, label in route_choices %}
-                <option value="{{ value }}" {% if selected_route == value %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <button type="submit">Show Buses</button>
-</form>
 
-{% if available_buses %}
-    <h2>Available buses on {{ travel_date }}</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Route</th>
-                <th>Day</th>
-                <th>Departure</th>
-                <th>Price</th>
-                <th>Seats Left</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for bus in available_buses %}
-                <tr>
-                    <td>{{ bus.name }}</td>
-                    <td>{{ bus.get_route_display }}</td>
-                    <td>{{ bus.get_day_display }}</td>
-                    <td>{{ bus.departure_time }}</td>
-                    <td>{{ bus.price }}</td>
-                    <td>{{ bus.available_seats(travel_date) }}</td>
-                    <td><a href="{% url 'bus:checkout' %}?bus_id={{ bus.id }}&travel_date={{ selected_date }}">Book</a></td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% endif %}
+    <section class="card border-0 ignite-bus-filter-card">
+        <div class="card-body p-4">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label for="travel_date" class="form-label">Travel date</label>
+                    <input class="form-control" type="date" name="travel_date" id="travel_date" value="{{ selected_date }}" min="{{ today }}" required>
+                </div>
+                <div class="col-md-5">
+                    <label for="route" class="form-label">Route</label>
+                    <select class="form-select" name="route" id="route" required>
+                        <option value="">Select a route</option>
+                        {% for value, label in route_choices %}
+                            <option value="{{ value }}" {% if selected_route == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Show buses</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    {% if error %}
+        <div class="alert alert-warning d-flex align-items-center gap-2 mt-4 mb-0" role="alert"><i class="bi bi-exclamation-circle-fill"></i><span>{{ error }}</span></div>
+    {% endif %}
+
+    {% if available_buses %}
+        <section class="card border-0 ignite-bus-list-card">
+            <div class="card-header ignite-bus-card-header">
+                <div>
+                    <h2>Available buses</h2>
+                    <p>{{ travel_date|date:"l, d F Y" }} · {{ selected_route|cut:"_"|title }}</p>
+                </div>
+                <span class="ignite-ticket-limit"><i class="bi bi-person-check"></i> Maximum 2 tickets per account</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 ignite-bus-table">
+                    <thead>
+                        <tr>
+                            <th>Bus</th>
+                            <th>Departure</th>
+                            <th>Route</th>
+                            <th>Fare</th>
+                            <th>Availability</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bus, seats_left in available_buses %}
+                            <tr>
+                                <td><div class="ignite-bus-name"><span><i class="bi bi-bus-front-fill"></i></span><strong>{{ bus.name }}</strong></div></td>
+                                <td><strong>{{ bus.departure_time|time:"g:i A" }}</strong><small>{{ bus.get_day_display }}</small></td>
+                                <td>{{ bus.get_route_display }}</td>
+                                <td><strong>₹{{ bus.price }}</strong></td>
+                                <td><span class="badge ignite-seat-badge">{{ seats_left }} of {{ bus.max_capacity }} seats left</span></td>
+                                <td class="text-end"><a href="{% url 'bus:checkout' %}?bus_id={{ bus.id }}&amp;travel_date={{ selected_date }}" class="btn btn-primary btn-sm"><i class="bi bi-ticket-perforated"></i> Book</a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {% elif selected_date and selected_route and not error %}
+        <section class="ignite-empty-state"><i class="bi bi-bus-front"></i><h2>No buses found</h2><p>Try another date or route.</p></section>
+    {% endif %}
+</section>
 {% endblock %}

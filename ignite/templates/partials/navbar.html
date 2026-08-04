@@ -14,8 +14,9 @@
             <a class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}"><i class="bi bi-house-door"></i> Home</a>
             {% if user.is_authenticated %}
                 <a class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"><i class="bi bi-grid-1x2"></i> Dashboard</a>
-                <a class="{% if request.resolver_match.url_name == 'bus:book_ticket' %}active{% endif %}" href="{% url 'bus:book_ticket' %}"><i class="bi bi-bus-front"></i> Bus Booking</a>
-                <a class="{% if request.resolver_match.url_name == 'bus:previous_bookings' %}active{% endif %}" href="{% url 'bus:previous_bookings' %}"><i class="bi bi-journal-text"></i> Previous Bookings</a>
+                <a class="{% if request.resolver_match.namespace == 'bus' and request.resolver_match.url_name == 'book_ticket' %}active{% endif %}" href="{% url 'bus:book_ticket' %}"><i class="bi bi-bus-front"></i> Bus Booking</a>
+                <a class="{% if request.resolver_match.namespace == 'bus' and request.resolver_match.url_name == 'previous_bookings' %}active{% endif %}" href="{% url 'bus:previous_bookings' %}"><i class="bi bi-journal-text"></i> Previous Bookings</a>
+                {% if user.is_staff %}<a class="{% if request.resolver_match.namespace == 'bus' and request.resolver_match.url_name == 'verify_ticket' %}active{% endif %}" href="{% url 'bus:verify_ticket' %}"><i class="bi bi-qr-code-scan"></i> Verify tickets</a>{% endif %}
             {% endif %}
         </nav>
 
@@ -41,7 +42,7 @@
         <nav class="ignite-sidebar-nav">
             <a href="{% url 'dashboard' %}#lhtc-scheduler"><i class="bi bi-calendar2-week"></i><span>LHTC Scheduler</span></a>
             <a href="{% url 'dashboard' %}#phc"><i class="bi bi-heart-pulse"></i><span>PHC</span></a>
-            <a href="{% url 'dashboard' %}#bus"><i class="bi bi-bus-front"></i><span>Bus</span></a>
+            <a href="{% url 'bus:dashboard' %}"><i class="bi bi-bus-front"></i><span>Bus</span></a>
             <a href="{% url 'dashboard' %}#canteen"><i class="bi bi-cup-hot"></i><span>Canteen</span></a>
             <a href="{% url 'dashboard' %}#chatbot"><i class="bi bi-chat-square-dots"></i><span>Chatbot</span></a>
             <a href="{% url 'lost_and_found:lost' %}"><i class="bi bi-search"></i><span>Lost &amp; Found</span></a>
