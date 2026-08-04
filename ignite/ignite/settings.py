@@ -38,10 +38,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+
     # third-party
     'rest_framework',
 
     # local apps
+    'accounts',
     'bus',
     'canteen',
     'phc',
@@ -58,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'ignite.urls'
@@ -80,6 +88,33 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ignite.wsgi.application'
 
 
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
+ACCOUNT_ADAPTER = 'accounts.adapters.InstituteAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'accounts.adapters.InstituteSocialAccountAdapter'
+
+LOGIN_URL = '/accounts/google/login/'
+LOGIN_REDIRECT_URL = 'accounts:post_login_redirect'
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # Google already verified it
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': config('GOOGLE_CLIENT_ID'),
+            'secret': config('GOOGLE_CLIENT_SECRET'),
+            'key': ''
+        },
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'},
+        'OAUTH_PKCE_ENABLED': True,
+    }
+}
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 

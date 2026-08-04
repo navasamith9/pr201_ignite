@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Welcome to Ignite</h1>
+{% if user.is_authenticated %}
+    <p>Hello, {{ user.email }} ({{ user.role }})</p>
+    <a href="{% url 'account_logout' %}">Log out</a>
+{% else %}
+    <a href="{% url 'account_login' %}">Sign in</a>
+{% endif %}
+{% endblock %}
