@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Share finder details | Ignite{% endblock %}
+{% block extra_head %}<link href="{% static 'lost_and_found/css/lost_and_found.css' %}" rel="stylesheet">{% endblock %}
+
+{% block content %}
+<section class="laf-page laf-narrow-page">
+    <div class="laf-heading">
+        <div>
+            <span class="laf-eyebrow"><i class="bi bi-hand-thumbs-up"></i> Confirm a found item</span>
+            <h1>Share your contact details</h1>
+            <p>The person who reported <strong>{{ lost_item.item_name }}</strong> will receive these details in their Ignite account.</p>
+        </div>
+        <a class="btn btn-outline-primary" href="{% url 'lost_and_found:lost' %}"><i class="bi bi-arrow-left"></i> Back to lost items</a>
+    </div>
+
+    <div class="laf-confirm-layout">
+        <article class="laf-item-preview">
+            <img src="{{ lost_item.photo.url }}" alt="Photo of {{ lost_item.item_name }}">
+            <div><h2>{{ lost_item.item_name }}</h2><p><i class="bi bi-geo-alt"></i> Lost at {{ lost_item.lost_place }}</p>{% if found_item %}<span class="laf-score"><i class="bi bi-stars"></i> {{ similarity_score }}% visual match</span>{% endif %}</div>
+        </article>
+        <section class="card laf-card">
+            <div class="card-body">
+                <h2>Your details</h2>
+                <p class="laf-card-copy">Please use a contact method you are comfortable sharing with the item owner.</p>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="mb-3"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</div>
+                    {% endfor %}
+                    <button class="btn btn-success w-100" type="submit"><i class="bi bi-send-check"></i> Notify item owner</button>
+                </form>
+            </div>
+        </section>
+    </div>
+</section>
+{% endblock %}

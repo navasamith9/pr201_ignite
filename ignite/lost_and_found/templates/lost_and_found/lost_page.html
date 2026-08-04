@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lost items | Ignite{% endblock %}
+{% block extra_head %}<link href="{% static 'lost_and_found/css/lost_and_found.css' %}" rel="stylesheet">{% endblock %}
+
+{% block content %}
+<section class="laf-page">
+    <div class="laf-heading">
+        <div>
+            <span class="laf-eyebrow"><i class="bi bi-search-heart"></i> Campus Lost &amp; Found</span>
+            <h1>Report a lost item</h1>
+            <p>Share the details and a clear photo. If someone finds it, their contact details will arrive in your Ignite account.</p>
+        </div>
+        <div class="laf-page-actions">
+            <a class="btn btn-outline-primary" href="{% url 'lost_and_found:found' %}"><i class="bi bi-box-arrow-in-up"></i> Found an item?</a>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} laf-alert" role="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="laf-intro-grid">
+        <section class="card laf-card">
+            <div class="card-body">
+                <h2>Lost-item details</h2>
+                <p class="laf-card-copy">All fields help the finder confirm that the item belongs to you.</p>
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-send"></i> Publish lost-item report</button>
+                </form>
+            </div>
+        </section>
+
+        <aside class="laf-found-prompt">
+            <span class="laf-prompt-icon"><i class="bi bi-hand-thumbs-up"></i></span>
+            <h2>Did you find an item?</h2>
+            <p>Upload its photo. Ignite checks it against every open lost-item report and shows likely matches from 60% similarity.</p>
+            <a class="btn btn-light" href="{% url 'lost_and_found:found' %}">Found <i class="bi bi-arrow-right"></i></a>
+        </aside>
+    </div>
+
+    <section class="laf-section" aria-labelledby="search-title">
+        <div class="laf-section-heading">
+            <div>
+                <span class="laf-eyebrow"><i class="bi bi-filter"></i> Browse reports</span>
+                <h2 id="search-title">Search lost items</h2>
+            </div>
+            <span class="laf-result-count">{{ reports|length }} shown</span>
+        </div>
+        <form class="laf-search" method="get">
+            <label class="visually-hidden" for="lost-search">Search lost items</label>
+            <input id="lost-search" class="form-control" type="search" name="q" value="{{ query }}" placeholder="Search by item, place, or reporter name">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Search</button>
+            {% if query %}<a class="btn btn-outline-secondary" href="{% url 'lost_and_found:lost' %}">Clear</a>{% endif %}
+        </form>
+
+        <div class="laf-report-grid">
+            {% for report in reports %}
+                <article class="card laf-report-card">
+                    <img src="{{ report.photo.url }}" alt="Photo of {{ report.item_name }}">
+                    <div class="laf-report-content">
+                        <span class="laf-status"><i class="bi bi-clock-history"></i> Open report</span>
+                        <h3>{{ report.item_name }}</h3>
+                        <p><i class="bi bi-geo-alt"></i> Lost at {{ report.lost_place }}</p>
+                        <time datetime="{{ report.created_at|date:'c' }}">Reported {{ report.created_at|date:'M j, Y' }}</time>
+                        <a class="btn btn-success btn-sm" href="{% url 'lost_and_found:claim_lost' report.id %}"><i class="bi bi-hand-thumbs-up"></i> Found</a>
+                    </div>
+                </article>
+            {% empty %}
+                <div class="laf-empty"><i class="bi bi-inbox"></i><p>No open lost-item reports match this search.</p></div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="laf-section laf-notifications" aria-labelledby="notification-title">
+        <div class="laf-section-heading">
+            <div>
+                <span class="laf-eyebrow"><i class="bi bi-bell"></i> Your account</span>
+                <h2 id="notification-title">Finder notifications</h2>
+            </div>
+        </div>
+        {% for notification in notifications %}
+            <article class="laf-notification">
+                <span><i class="bi bi-check2-circle"></i></span>
+                <div><h3>{{ notification.title }}</h3><p>{{ notification.message }}</p></div>
+                <time datetime="{{ notification.created_at|date:'c' }}">{{ notification.created_at|date:'M j, g:i a' }}</time>
+            </article>
+        {% empty %}
+            <div class="laf-empty laf-empty--compact"><i class="bi bi-bell-slash"></i><p>No finder details have been received yet.</p></div>
+        {% endfor %}
+    </section>
+</section>
+{% endblock %}

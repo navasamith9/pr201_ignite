@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Possible matches | Ignite{% endblock %}
+{% block extra_head %}<link href="{% static 'lost_and_found/css/lost_and_found.css' %}" rel="stylesheet">{% endblock %}
+
+{% block content %}
+<section class="laf-page">
+    <div class="laf-heading">
+        <div>
+            <span class="laf-eyebrow"><i class="bi bi-stars"></i> Image match complete</span>
+            <h1>Possible lost-item matches</h1>
+            <p>We found {{ matches|length }} possible match{{ matches|length|pluralize }} for your uploaded photo. Please choose only the item you recognise.</p>
+        </div>
+        <a class="btn btn-outline-primary" href="{% url 'lost_and_found:found' %}"><i class="bi bi-plus-lg"></i> Upload another item</a>
+    </div>
+
+    <div class="laf-compare-strip">
+        <img src="{{ found_item.photo.url }}" alt="The found item you uploaded">
+        <div><span class="laf-status"><i class="bi bi-image"></i> Your uploaded photo</span><p>Use the comparison below to ensure the reported item is the same one.</p></div>
+    </div>
+
+    <div class="laf-match-grid">
+        {% for lost_item, score in matches %}
+            <article class="card laf-match-card">
+                <img src="{{ lost_item.photo.url }}" alt="Photo of {{ lost_item.item_name }}">
+                <div class="laf-report-content">
+                    <span class="laf-score"><i class="bi bi-stars"></i> {{ score }}% visual match</span>
+                    <h2>{{ lost_item.item_name }}</h2>
+                    <p><i class="bi bi-geo-alt"></i> Lost at {{ lost_item.lost_place }}</p>
+                    <a class="btn btn-success" href="{% url 'lost_and_found:claim_matched_lost' lost_item.id found_item.id %}"><i class="bi bi-hand-thumbs-up"></i> Found</a>
+                </div>
+            </article>
+        {% empty %}
+            <div class="laf-empty laf-empty--wide"><i class="bi bi-search"></i><h2>No likely matches yet</h2><p>Your found-item report was saved. You can check the open lost-item reports or upload another clearer image.</p><a class="btn btn-primary" href="{% url 'lost_and_found:lost' %}">Browse lost reports</a></div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
