@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard | Ignite{% endblock %}
+{% block content %}
+<section class="ignite-dashboard container-fluid">
+    <div class="ignite-dashboard-heading">
+        <div>
+            <span class="ignite-eyebrow"><i class="bi bi-grid-1x2"></i> Overview</span>
+            <h1>Dashboard</h1>
+            <p>Your campus services are one click away.</p>
+        </div>
+        <a href="{% url 'home' %}" class="btn btn-outline-primary"><i class="bi bi-house-door"></i> Home</a>
+    </div>
+
+    <div class="ignite-notification-centre">
+        <section class="card ignite-notification-card border-0" aria-labelledby="recent-notifications-title">
+            <div class="ignite-notification-header">
+                <div>
+                    <span class="ignite-eyebrow"><i class="bi bi-bell"></i> Stay updated</span>
+                    <h2 id="recent-notifications-title">Recent notifications</h2>
+                </div>
+                {% if recent_notifications %}<span class="ignite-notification-count">{{ recent_notifications|length }} recent</span>{% endif %}
+            </div>
+            {% if recent_notifications %}
+                <div class="ignite-notification-list">
+                    {% for notification in recent_notifications %}
+                        <article class="ignite-notification-item">
+                            <span class="ignite-notification-icon tone-{{ notification.tone }}"><i class="bi {{ notification.icon }}"></i></span>
+                            <div class="ignite-notification-copy"><h3>{{ notification.title }}</h3><p>{{ notification.message }}</p></div>
+                            <time>{{ notification.time }}</time>{% if notification.unread %}<span class="ignite-unread-dot" aria-label="Unread"></span>{% endif %}
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="ignite-empty-notifications"><i class="bi bi-bell-slash"></i><p>You’re all caught up. There are no recent notifications.</p></div>
+            {% endif %}
+        </section>
+    </div>
+
+    <section class="ignite-dashboard-services" aria-labelledby="available-services-title">
+        <div class="ignite-dashboard-services-heading"><h2 id="available-services-title">Available services</h2><p>Jump straight to a campus tool.</p></div>
+        <div class="ignite-dashboard-service-grid">
+            <a id="lhtc-scheduler" class="ignite-dashboard-service tone-indigo" href="#lhtc-scheduler"><i class="bi bi-calendar2-week"></i><span>LHTC Scheduler</span></a>
+            <a id="phc" class="ignite-dashboard-service tone-rose" href="#phc"><i class="bi bi-heart-pulse"></i><span>PHC</span></a>
+            <a id="bus" class="ignite-dashboard-service tone-cyan" href="#bus"><i class="bi bi-bus-front"></i><span>Bus</span></a>
+            <a id="canteen" class="ignite-dashboard-service tone-orange" href="#canteen"><i class="bi bi-cup-hot"></i><span>Canteen</span></a>
+            <a id="chatbot" class="ignite-dashboard-service tone-violet" href="#chatbot"><i class="bi bi-chat-square-dots"></i><span>Chatbot</span></a>
+            <a id="lost-and-found" class="ignite-dashboard-service tone-green" href="#lost-and-found"><i class="bi bi-search"></i><span>Lost &amp; Found</span></a>
+        </div>
+    </section>
+</section>
+{% endblock %}

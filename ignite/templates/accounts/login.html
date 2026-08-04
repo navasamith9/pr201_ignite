@@ -1,9 +1,44 @@
 {% extends 'base.html' %}
 {% load allauth %}
+{% load socialaccount %}
+{% block title %}Sign in | Ignite{% endblock %}
+{% block body_class %}ignite-auth-body{% endblock %}
+{% block navigation %}{% endblock %}
+{% block footer %}{% endblock %}
 {% block content %}
-<h1>Sign In</h1>
-<p>Please use your institute Google account to continue.</p>
-<a href="{% provider_login_url 'google' %}" class="btn">
-    Continue with Google
-</a>
+<section class="ignite-login-page">
+    <div class="ignite-login-intro">
+        <a href="{% url 'home' %}" class="ignite-brand">
+            <span class="ignite-brand-mark"><i class="bi bi-lightning-charge-fill"></i></span>
+            <span>ignite<span class="ignite-brand-dot">.</span></span>
+        </a>
+        <div class="ignite-login-intro-copy">
+            <span class="ignite-eyebrow ignite-eyebrow--light"><i class="bi bi-stars"></i> Campus services, connected</span>
+            <h1>Your campus, all in one place.</h1>
+            <p>Plan your day, find what you need, and stay in sync with the Ignite student portal.</p>
+        </div>
+        <div class="ignite-login-features">
+            <span><i class="bi bi-calendar2-week"></i> LHTC Scheduler</span>
+            <span><i class="bi bi-bus-front"></i> Live Bus updates</span>
+            <span><i class="bi bi-chat-square-dots"></i> Campus help</span>
+        </div>
+    </div>
+    <div class="ignite-login-form-panel">
+        <div class="ignite-login-card card border-0 shadow-sm">
+            <div class="card-body p-4 p-md-5">
+                <a href="{% url 'home' %}" class="ignite-mobile-brand ignite-brand" aria-label="Ignite home">
+                    <span class="ignite-brand-mark"><i class="bi bi-lightning-charge-fill"></i></span>
+                </a>
+                <div class="ignite-login-heading">
+                    <h1>Welcome back</h1>
+                    <p>Sign in with your institute Google account to continue to Ignite.</p>
+                </div>
+                <a href="{% provider_login_url 'google' %}" class="btn btn-primary w-100 ignite-google-button">
+                    <i class="bi bi-google"></i> Continue with Google
+                </a>
+                <p class="ignite-login-help"><i class="bi bi-shield-check"></i> Only verified institute accounts can access campus services.</p>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}
