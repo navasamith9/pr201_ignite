@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Bus Service | Ignite{% endblock %}
+
+{% block content %}
+<section class="ignite-bus-page container-fluid">
+    <div class="ignite-page-heading"><div><span class="ignite-eyebrow"><i class="bi bi-bus-front"></i> Campus transport</span><h1>Bus service</h1><p>Plan your journey, keep your ticket handy, and board with confidence.</p></div></div>
+    <div class="row g-4">
+        <div class="col-md-6"><a href="{% url 'bus:book_ticket' %}" class="ignite-bus-action-card"><span class="tone-cyan"><i class="bi bi-ticket-perforated"></i></span><div><h2>Book a ticket</h2><p>Find buses by date and route, then reserve up to two tickets.</p></div><i class="bi bi-arrow-right-short"></i></a></div>
+        <div class="col-md-6"><a href="{% url 'bus:previous_bookings' %}" class="ignite-bus-action-card"><span class="tone-indigo"><i class="bi bi-receipt"></i></span><div><h2>Previous bookings</h2><p>View your tickets or download a copy whenever you need it.</p></div><i class="bi bi-arrow-right-short"></i></a></div>
+        {% if user.is_staff %}<div class="col-md-6"><a href="{% url 'bus:verify_ticket' %}" class="ignite-bus-action-card ignite-bus-action-card--admin"><span class="tone-green"><i class="bi bi-qr-code-scan"></i></span><div><h2>Verify ticket</h2><p>Scan a QR code and confirm passenger boarding.</p></div><i class="bi bi-arrow-right-short"></i></a></div>{% endif %}
+    </div>
+</section>
+{% endblock %}

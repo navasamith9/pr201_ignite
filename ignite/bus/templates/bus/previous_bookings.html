@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Previous Bus Bookings | Ignite{% endblock %}
+
+{% block content %}
+<section class="ignite-bus-page container-fluid">
+    <div class="ignite-page-heading">
+        <div><span class="ignite-eyebrow"><i class="bi bi-receipt"></i> Travel history</span><h1>Previous bookings</h1><p>View, download and keep track of your bus tickets.</p></div>
+        <a href="{% url 'bus:book_ticket' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Book a ticket</a>
+    </div>
+    <section class="card border-0 ignite-bus-list-card">
+        {% if bookings %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 ignite-bus-table">
+                    <thead><tr><th>Journey</th><th>Date & time</th><th>Tickets</th><th>Status</th><th class="text-end">Ticket</th></tr></thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                            <tr>
+                                <td><strong>{{ booking.bus.name }}</strong><small>{{ booking.bus.get_route_display }}</small></td>
+                                <td>{{ booking.travel_date|date:"d M Y" }}<small>{{ booking.bus.departure_time|time:"g:i A" }}</small></td>
+                                <td>{{ booking.quantity }}</td>
+                                <td><span class="badge {% if booking.status == 'paid' %}ignite-status-paid{% elif booking.status == 'cancelled' %}ignite-status-cancelled{% else %}ignite-status-pending{% endif %}">{{ booking.get_status_display }}</span></td>
+                                <td class="text-end">{% if booking.status == 'paid' %}<a class="btn btn-outline-primary btn-sm" href="{% url 'bus:ticket_detail' booking.ticket_id %}"><i class="bi bi-qr-code"></i> View ticket</a>{% else %}<span class="text-body-secondary small">Payment pending</span>{% endif %}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="ignite-empty-state"><i class="bi bi-ticket-perforated"></i><h2>No bookings yet</h2><p>Your paid bus tickets will appear here.</p><a href="{% url 'bus:book_ticket' %}" class="btn btn-primary">Find a bus</a></div>
+        {% endif %}
+    </section>
+</section>
+{% endblock %}

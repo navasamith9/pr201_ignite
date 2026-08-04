@@ -18,11 +18,17 @@
     {% block navigation %}{% include 'partials/navbar.html' %}{% endblock %}
 
     <main class="ignite-main {% if user.is_authenticated %}ignite-main--signed-in{% endif %}">
+        {% if messages %}
+            <div class="container-fluid ignite-message-stack">
+                {% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">{{ message }}<button type="button" class="btn-close" data-coreui-dismiss="alert" aria-label="Close"></button></div>{% endfor %}
+            </div>
+        {% endif %}
         {% block content %}{% endblock %}
     </main>
 
     {% block footer %}{% include 'partials/footer.html' %}{% endblock %}
     <script src="https://cdn.jsdelivr.net/npm/@coreui/coreui@5/dist/js/coreui.bundle.min.js"></script>
     <script src="{% static 'js/ignite.js' %}"></script>
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>

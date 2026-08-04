@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Bus Checkout | Ignite{% endblock %}
+
+{% block content %}
+<section class="ignite-bus-page container-fluid">
+    <div class="ignite-page-heading">
+        <div>
+            <span class="ignite-eyebrow"><i class="bi bi-shield-check"></i> Secure checkout</span>
+            <h1>{% if booking %}Complete your payment{% else %}Confirm your journey{% endif %}</h1>
+            <p>{% if booking %}Your seat selection is ready. Pay securely with Razorpay to issue your ticket.{% else %}Choose the number of tickets before continuing to payment.{% endif %}</p>
+        </div>
+        <a href="{% url 'bus:book_ticket' %}" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> Back to buses</a>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <div class="col-lg-7">
+            <section class="card border-0 ignite-checkout-card">
+                <div class="card-body p-4 p-md-5">
+                    <div class="ignite-checkout-bus"><span><i class="bi bi-bus-front-fill"></i></span><div><h2>{{ bus.name }}</h2><p>{{ bus.get_route_display }} · {{ bus.departure_time|time:"g:i A" }}</p></div></div>
+                    <dl class="ignite-trip-details">
+                        <div><dt>Travel date</dt><dd>{% if booking %}{{ booking.travel_date|date:"D, d M Y" }}{% else %}{{ travel_date|date:"D, d M Y" }}{% endif %}</dd></div>
+                        <div><dt>Fare per ticket</dt><dd>₹{{ bus.price }}</dd></div>
+                        <div><dt>Bus capacity</dt><dd>{{ bus.max_capacity }} seats</dd></div>
+                    </dl>
+
+                    {% if booking %}
+                        <div class="ignite-payment-summary">
+                            <span>Tickets <strong>{{ booking.quantity }}</strong></span>
+                            <span>Total <strong>₹{{ payment.amount_rupees|floatformat:2 }}</strong></span>
+                        </div>
+                        <form id="payment-csrf" class="d-none">{% csrf_token %}</form>
+                        {% if razorpay_key %}
+                            <button id="pay-button" type="button" class="btn btn-primary btn-lg w-100"><i class="bi bi-lock-fill"></i> Pay ₹{{ payment.amount_rupees|floatformat:2 }} with Razorpay</button>
+                            <p class="ignite-payment-note"><i class="bi bi-shield-lock"></i> Test payments are verified on the server before a ticket is issued.</p>
+                        {% else %}
+                            <div class="alert alert-warning mb-0"><i class="bi bi-key me-2"></i>Razorpay test keys are not configured yet. Add <code>RAZORPAY_KEY_ID</code> and <code>RAZORPAY_KEY_SECRET</code> to the project environment.</div>
+                        {% endif %}
+                        <div id="payment-status" class="small mt-3" aria-live="polite"></div>
+                    {% else %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="bus_id" value="{{ bus.id }}">
+                            <input type="hidden" name="travel_date" value="{{ travel_date|date:'Y-m-d' }}">
+                            <label for="quantity" class="form-label">Number of tickets</label>
+                            <select class="form-select form-select-lg mb-4" id="quantity" name="quantity">
+                                {% for quantity in quantity_choices %}
+                                    <option value="{{ quantity }}">{{ quantity }} ticket{% if quantity > 1 %}s{% endif %} — ₹{% widthratio bus.price 1 quantity %}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-lg w-100"><i class="bi bi-arrow-right-circle"></i> Continue to payment</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </section>
+        </div>
+        <aside class="col-lg-4">
+            <section class="card border-0 ignite-checkout-help">
+                <div class="card-body p-4"><i class="bi bi-info-circle"></i><h2>Before you pay</h2><ul><li>A maximum of two tickets can be booked by one account for the same date.</li><li>Your QR ticket is generated only after Razorpay confirms payment.</li><li>You can download the ticket later from Previous bookings.</li></ul></div>
+            </section>
+        </aside>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if booking and razorpay_key %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+(() => {
+    const payButton = document.getElementById('pay-button');
+    const status = document.getElementById('payment-status');
+    const paymentId = '{{ payment.id }}';
+    const csrf = document.querySelector('#payment-csrf [name=csrfmiddlewaretoken]').value;
+    const request = (url, values) => fetch(url, {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrf},
+        body: new URLSearchParams(values),
+    }).then(async response => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Payment request could not be completed.');
+        return data;
+    });
+
+    payButton.addEventListener('click', () => {
+        payButton.disabled = true;
+        status.textContent = 'Opening secure payment…';
+        request('{% url "payments:checkout" %}', {payment_id: paymentId})
+            .then(data => {
+                const checkout = new Razorpay({
+                    key: data.key,
+                    amount: data.order.amount,
+                    currency: data.order.currency,
+                    order_id: data.order.id,
+                    name: 'Ignite Campus',
+                    description: 'Bus ticket payment',
+                    handler: response => request('{% url "payments:confirm" %}', {
+                        payment_id: paymentId,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_signature: response.razorpay_signature,
+                    }).then(result => { window.location.assign(result.redirect_url); }),
+                    modal: {ondismiss: () => { payButton.disabled = false; status.textContent = 'Payment was cancelled. You can try again.'; }},
+                    prefill: {name: '{{ request.user.get_full_name|default:request.user.username|escapejs }}', email: '{{ request.user.email|escapejs }}'},
+                    theme: {color: '#4f46e5'},
+                });
+                checkout.open();
+            })
+            .catch(error => { payButton.disabled = false; status.textContent = error.message; });
+    });
+})();
+</script>
+{% endif %}
+{% endblock %}

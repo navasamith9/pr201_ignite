@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Bus Ticket | Ignite{% endblock %}
+
+{% block content %}
+<section class="ignite-bus-page container-fluid">
+    <div class="ignite-page-heading">
+        <div><span class="ignite-eyebrow"><i class="bi bi-patch-check"></i> Payment confirmed</span><h1>Your bus ticket</h1><p>Present the QR code to the bus administrator when boarding.</p></div>
+        <a href="{% url 'bus:previous_bookings' %}" class="btn btn-outline-primary"><i class="bi bi-receipt"></i> Previous bookings</a>
+    </div>
+
+    <section class="ignite-ticket card border-0 mx-auto">
+        <div class="ignite-ticket-top"><span class="ignite-ticket-logo"><i class="bi bi-lightning-charge-fill"></i></span><div><span>IGNITE CAMPUS TRANSPORT</span><h2>Boarding pass</h2></div><span class="badge ignite-status-paid"><i class="bi bi-check-circle-fill"></i> Paid</span></div>
+        <div class="ignite-ticket-body">
+            <div class="ignite-ticket-journey"><div><span>FROM</span><strong>{% if booking.route == 'college_city' %}College{% else %}City{% endif %}</strong></div><i class="bi bi-arrow-right"></i><div><span>TO</span><strong>{% if booking.route == 'college_city' %}City{% else %}College{% endif %}</strong></div></div>
+            <div class="ignite-ticket-grid"><div><span>PASSENGER</span><strong>{{ booking.user.get_full_name|default:booking.user.username }}</strong></div><div><span>BUS</span><strong>{{ booking.bus.name }}</strong></div><div><span>DATE</span><strong>{{ booking.travel_date|date:"d M Y" }}</strong></div><div><span>DEPARTURE</span><strong>{{ booking.bus.departure_time|time:"g:i A" }}</strong></div><div><span>TICKETS</span><strong>{{ booking.quantity }}</strong></div><div><span>TICKET ID</span><strong class="ignite-ticket-id">{{ booking.ticket_id }}</strong></div></div>
+        </div>
+        <div class="ignite-ticket-qr"><img src="data:image/png;base64,{{ qr_base64 }}" alt="QR code for ticket {{ booking.ticket_id }}"><div><strong>Scan before boarding</strong><p>Keep this code visible for verification.</p><span>Payment ref: {{ booking.payment_reference }}</span></div></div>
+        <div class="ignite-ticket-actions"><a href="{% url 'bus:download_ticket' booking.ticket_id %}" class="btn btn-primary"><i class="bi bi-download"></i> Download ticket</a><a href="{% url 'bus:book_ticket' %}" class="btn btn-link">Book another trip</a></div>
+    </section>
+</section>
+{% endblock %}

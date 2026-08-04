@@ -34,7 +34,7 @@
         <a class="ignite-service-card tone-rose" href="{% if user.is_authenticated %}{% url 'dashboard' %}#phc{% else %}{% url 'account_login' %}{% endif %}">
             <span class="ignite-service-icon"><i class="bi bi-heart-pulse"></i></span><h3>PHC</h3><p>Book care and access campus health support.</p><span class="ignite-card-arrow"><i class="bi bi-arrow-up-right"></i></span>
         </a>
-        <a class="ignite-service-card tone-cyan" href="{% if user.is_authenticated %}{% url 'dashboard' %}#bus{% else %}{% url 'account_login' %}{% endif %}">
+        <a class="ignite-service-card tone-cyan" href="{% if user.is_authenticated %}{% url 'bus:dashboard' %}{% else %}{% url 'account_login' %}{% endif %}">
             <span class="ignite-service-icon"><i class="bi bi-bus-front"></i></span><h3>Bus</h3><p>Check live routes and campus shuttle times.</p><span class="ignite-card-arrow"><i class="bi bi-arrow-up-right"></i></span>
         </a>
         <a class="ignite-service-card tone-orange" href="{% if user.is_authenticated %}{% url 'dashboard' %}#canteen{% else %}{% url 'account_login' %}{% endif %}">

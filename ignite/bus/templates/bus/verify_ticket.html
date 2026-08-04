@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Bus Ticket | Ignite{% endblock %}
+
+{% block content %}
+<section class="ignite-bus-page container-fluid">
+    <div class="ignite-page-heading"><div><span class="ignite-eyebrow"><i class="bi bi-qr-code-scan"></i> Administrator</span><h1>Verify boarding ticket</h1><p>Scan the passenger QR code or enter the ticket ID manually.</p></div><a href="{% url 'bus:dashboard' %}" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> Bus dashboard</a></div>
+    <div class="row g-4 justify-content-center"><div class="col-lg-7"><section class="card border-0 ignite-verify-card"><div class="card-body p-4 p-md-5">
+        <div class="ignite-scanner-shell"><video id="qr-video" playsinline muted></video><div class="ignite-scanner-target"><i class="bi bi-qr-code-scan"></i></div><p id="scanner-message">Use the camera scanner or enter the ticket ID below.</p></div>
+        <button id="start-scanner" type="button" class="btn btn-outline-primary w-100 mb-4"><i class="bi bi-camera"></i> Start camera scanner</button>
+        <div class="ignite-form-divider"><span>or verify manually</span></div>
+        <form method="post" id="verify-form">{% csrf_token %}<label class="form-label" for="ticket_payload">Ticket ID or scanned QR value</label><div class="input-group"><span class="input-group-text"><i class="bi bi-ticket-perforated"></i></span><input class="form-control" id="ticket_payload" name="ticket_payload" autocomplete="off" required autofocus placeholder="Paste or scan ticket value"><button class="btn btn-primary" type="submit">Verify</button></div></form>
+    </div></section></div>
+    {% if result or verification_error %}<div class="col-lg-5"><section class="card border-0 ignite-verification-result {% if verification_state == 'accepted' %}is-valid{% else %}is-invalid{% endif %}"><div class="card-body p-4"><i class="bi {% if verification_state == 'accepted' %}bi-check-circle-fill{% else %}bi-x-circle-fill{% endif %}"></i>{% if verification_state == 'accepted' %}<span class="ignite-eyebrow">Accepted</span><h2>Ticket verified</h2><p>{{ result.user.get_full_name|default:result.user.username }} may board {{ result.bus.name }}.</p><dl><div><dt>Route</dt><dd>{{ result.bus.get_route_display }}</dd></div><div><dt>Departure</dt><dd>{{ result.bus.departure_time|time:"g:i A" }}</dd></div><div><dt>Tickets</dt><dd>{{ result.quantity }}</dd></div></dl>{% else %}<span class="ignite-eyebrow">Not accepted</span><h2>Ticket cannot be used</h2><p>{{ verification_error }}</p>{% endif %}</div></section></div>{% endif %}</div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(() => {
+    const start = document.getElementById('start-scanner');
+    const video = document.getElementById('qr-video');
+    const input = document.getElementById('ticket_payload');
+    const message = document.getElementById('scanner-message');
+    let stream;
+    let detector;
+    const stop = () => { if (stream) stream.getTracks().forEach(track => track.stop()); stream = null; };
+    const scan = async () => {
+        if (!stream || !detector) return;
+        try { const codes = await detector.detect(video); if (codes.length) { input.value = codes[0].rawValue; stop(); document.getElementById('verify-form').submit(); return; } } catch (_) {}
+        requestAnimationFrame(scan);
+    };
+    start.addEventListener('click', async () => {
+        if (!('BarcodeDetector' in window)) { message.textContent = 'This browser does not support camera QR scanning. Use the ticket ID field below.'; return; }
+        try { detector = new BarcodeDetector({formats: ['qr_code']}); stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: {ideal: 'environment'}}}); video.srcObject = stream; await video.play(); message.textContent = 'Point the camera at the ticket QR code.'; start.disabled = true; scan(); } catch (_) { message.textContent = 'Camera access was unavailable. Use the ticket ID field below.'; }
+    });
+    window.addEventListener('beforeunload', stop);
+})();
+</script>
+{% endblock %}
