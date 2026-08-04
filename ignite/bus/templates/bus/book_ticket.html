@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Bus Ticket{% endblock %}
+
+{% block content %}
+<h1>Book Ticket</h1>
+{% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+<form method="post">
+    {% csrf_token %}
+    <div>
+        <label for="travel_date">Travel Date</label>
+        <input type="date" name="travel_date" id="travel_date" value="{{ selected_date }}" required>
+    </div>
+    <div>
+        <label for="route">Route</label>
+        <select name="route" id="route" required>
+            <option value="">Select route</option>
+            {% for value, label in route_choices %}
+                <option value="{{ value }}" {% if selected_route == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit">Show Buses</button>
+</form>
+
+{% if available_buses %}
+    <h2>Available buses on {{ travel_date }}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Route</th>
+                <th>Day</th>
+                <th>Departure</th>
+                <th>Price</th>
+                <th>Seats Left</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bus in available_buses %}
+                <tr>
+                    <td>{{ bus.name }}</td>
+                    <td>{{ bus.get_route_display }}</td>
+                    <td>{{ bus.get_day_display }}</td>
+                    <td>{{ bus.departure_time }}</td>
+                    <td>{{ bus.price }}</td>
+                    <td>{{ bus.available_seats(travel_date) }}</td>
+                    <td><a href="{% url 'bus:checkout' %}?bus_id={{ bus.id }}&travel_date={{ selected_date }}">Book</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+{% endblock %}

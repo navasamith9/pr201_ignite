@@ -3,3 +3,7 @@ Django==5.2.16
 djangorestframework==3.17.1
 python-decouple==3.8
 sqlparse==0.5.5
+django-allauth==65.18.0
+requests==2.34.2
+PyJWT==2.13.0
+cryptography==50.0.0

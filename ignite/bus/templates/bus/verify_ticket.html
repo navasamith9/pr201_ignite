@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Ticket{% endblock %}
+
+{% block content %}
+<h1>Verify Ticket</h1>
+<form method="post">
+    {% csrf_token %}
+    <div>
+        <label for="ticket_id">Ticket ID / QR payload</label>
+        <input type="text" id="ticket_id" name="ticket_id" required>
+    </div>
+    <button type="submit">Verify</button>
+</form>
+
+{% if result %}
+    <div>
+        <h2>Ticket Verified</h2>
+        <p><strong>Ticket:</strong> {{ result.ticket_id }}</p>
+        <p><strong>User:</strong> {{ result.user.username }}</p>
+        <p><strong>Route:</strong> {{ result.bus.get_route_display }}</p>
+        <p><strong>Date:</strong> {{ result.travel_date }}</p>
+        <p><strong>Status:</strong> {{ result.get_status_display }}</p>
+    </div>
+{% elif verification_error %}
+    <div class="alert alert-danger">{{ verification_error }}</div>
+{% endif %}
+{% endblock %}

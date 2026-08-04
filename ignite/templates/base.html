@@ -24,5 +24,6 @@
     {% block footer %}{% include 'partials/footer.html' %}{% endblock %}
     <script src="https://cdn.jsdelivr.net/npm/@coreui/coreui@5/dist/js/coreui.bundle.min.js"></script>
     <script src="{% static 'js/ignite.js' %}"></script>
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Ticket Detail{% endblock %}
+
+{% block content %}
+<h1>Ticket Detail</h1>
+<p><strong>Ticket:</strong> {{ booking.ticket_id }}</p>
+<p><strong>Bus:</strong> {{ booking.bus.name }}</p>
+<p><strong>Date:</strong> {{ booking.travel_date }}</p>
+<p><strong>Time:</strong> {{ booking.bus.departure_time }}</p>
+<p><strong>Route:</strong> {{ booking.bus.get_route_display }}</p>
+<p><strong>Quantity:</strong> {{ booking.quantity }}</p>
+<p><strong>Status:</strong> {{ booking.get_status_display }}</p>
+{% if qr_base64 %}
+    <div>
+        <img src="data:image/png;base64,{{ qr_base64 }}" alt="Ticket QR Code">
+    </div>
+{% endif %}
+<p><a href="{% url 'bus:download_ticket' booking.ticket_id %}">Download Ticket</a></p>
+{% endblock %}

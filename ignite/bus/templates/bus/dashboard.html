@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Bus Dashboard{% endblock %}
+
+{% block content %}
+<h1>Student Dashboard</h1>
+<ul>
+    <li><a href="{% url 'bus:book_ticket' %}">Book Ticket</a></li>
+    <li><a href="{% url 'bus:previous_bookings' %}">Previous Bookings</a></li>
+    <li><a href="{% url 'bus:verify_ticket' %}">Verify Ticket</a></li>
+</ul>
+{% endblock %}

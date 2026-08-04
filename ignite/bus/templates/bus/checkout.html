@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<h1>Checkout</h1>
+{% if booking %}
+    <p>Booking created for {{ booking.quantity }} ticket(s) on {{ booking.travel_date }}.</p>
+    <p>Total amount: ₹{{ amount }}</p>
+    <button id="pay-button">Pay Now</button>
+    <div id="payment-status"></div>
+    <form id="confirm-form" method="post" style="display:none;">
+        {% csrf_token %}
+    </form>
+{% else %}
+    <p>Please select a bus first.</p>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function() {
+    const bookingId = '{{ booking.id if booking else "" }}';
+    const amount = {{ amount if booking else 0 }};
+    const key = '{{ razorpay_key }}';
+
+    function postJson(url, data) {
+        return fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            body: JSON.stringify(data),
+        }).then(res => res.json());
+    }
+
+    const payButton = document.getElementById('pay-button');
+    if (payButton) {
+        payButton.addEventListener('click', function() {
+            if (!bookingId || !amount || !key) {
+                document.getElementById('payment-status').innerText = 'Payment cannot be initiated.';
+                return;
+            }
+
+            postJson('{% url "payments:checkout" %}', { booking_id: bookingId, amount: amount })
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('payment-status').innerText = data.error;
+                        return;
+                    }
+
+                    const options = {
+                        key: key,
+                        amount: data.order.amount,
+                        currency: data.order.currency,
+                        order_id: data.order.id,
+                        name: 'Ignite Bus Ticket',
+                        description: 'College bus ticket payment',
+                        handler: function(response) {
+                            postJson('{% url "payments:confirm" %}', {
+                                booking_id: bookingId,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_signature: response.razorpay_signature,
+                            }).then(result => {
+                                if (result.success) {
+                                    window.location.href = '{% url "bus:ticket_detail" booking.ticket_id %}';
+                                } else {
+                                    document.getElementById('payment-status').innerText = result.error || 'Payment verification failed.';
+                                }
+                            });
+                        },
+                        prefill: {
+                            name: '{{ request.user.get_full_name|default:request.user.username }}',
+                            email: '{{ request.user.email }}',
+                        },
+                        theme: { color: '#3399cc' },
+                    };
+                    const rzp = new Razorpay(options);
+                    rzp.open();
+                });
+        });
+    }
+})();
+</script>
+{% endblock %}

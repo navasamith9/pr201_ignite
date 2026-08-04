@@ -25,7 +25,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('accounts/', include('accounts.urls')),
-    path('api/bus/', include('bus.urls')),
+    path('bus/', include('bus.urls')),
+    path('payments/', include('payments.urls')),
     path('lost-and-found/', include('lost_and_found.urls')),
 ]
 
