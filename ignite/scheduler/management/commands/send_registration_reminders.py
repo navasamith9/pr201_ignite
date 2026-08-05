@@ -3,8 +3,9 @@ from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from scheduler.models import Event
+from scheduler.models import BookingHistory, Event
 from scheduler.email_services import send_registration_reminder
+from scheduler.services import student_recipients_for
 
 
 class Command(BaseCommand):
@@ -36,12 +37,7 @@ class Command(BaseCommand):
 
         for event in events:
 
-            # For the current test version, remind users
-            # who are associated with the event.
-            #
-            # Later we will replace this with proper
-            # branch/year participant selection.
-            recipients = list(event.coordinators.all())
+            recipients = student_recipients_for(event)
 
             sent_count = send_registration_reminder(
                 event=event,
@@ -63,4 +59,9 @@ class Command(BaseCommand):
                     f"registration reminder processed "
                     f"for {sent_count} email(s)."
                 )
+            )
+            BookingHistory.objects.create(
+                event=event,
+                action="REGISTRATION_REMINDER_SENT",
+                notes="Registration closes within 24 hours.",
             )

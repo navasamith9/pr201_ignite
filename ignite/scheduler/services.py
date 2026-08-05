@@ -1,4 +1,64 @@
-from .models import Room, Event
+from django.conf import settings
+from django.contrib.auth import get_user_model
+
+from .models import Room, Event, TimetableEntry
+
+
+def user_matches_event_audience(user, event):
+    """Return whether a student belongs to an event's target audience."""
+    if event.branches and user.branch not in event.branches:
+        return False
+    if event.years and user.academic_year not in event.years:
+        return False
+    return True
+
+
+def student_recipients_for(event):
+    students = get_user_model().objects.filter(role="student")
+    return [student for student in students if user_matches_event_audience(student, event)]
+
+
+def ensure_default_scheduler_data():
+    """Create usable starter rooms for an empty development database.
+
+    A new local installation otherwise has no rooms, which makes every event
+    stay in DRAFT because there is nothing to recommend.  This only runs with
+    DEBUG enabled and never overwrites rooms entered by staff.
+    """
+    if not settings.DEBUG or Room.objects.exists():
+        return
+
+    rooms = {}
+    room_data = [
+        ("A101", "Academic Block A", "Ground", 40, True, False, True, False, False),
+        ("A201", "Academic Block A", "First", 90, True, True, True, True, False),
+        ("Computer Lab 1", "Technology Block", "First", 30, True, True, True, False, True),
+        ("Central Auditorium", "Main Block", "Ground", 250, True, True, True, True, True),
+    ]
+    for name, building, floor, capacity, projector, ac, wifi, audio, smart_board in room_data:
+        rooms[name], _ = Room.objects.get_or_create(
+            name=name,
+            defaults={
+                "building": building,
+                "floor": floor,
+                "capacity": capacity,
+                "has_projector": projector,
+                "has_ac": ac,
+                "has_wifi": wifi,
+                "has_audio_system": audio,
+                "has_smart_board": smart_board,
+                "is_active": True,
+            },
+        )
+
+    TimetableEntry.objects.get_or_create(
+        room=rooms["A101"], day_of_week=0, start_time="10:00", end_time="12:00",
+        defaults={"branch": "CSE", "year": 2, "subject": "Data Structures"},
+    )
+    TimetableEntry.objects.get_or_create(
+        room=rooms["A201"], day_of_week=0, start_time="09:00", end_time="11:00",
+        defaults={"branch": "ECE", "year": 3, "subject": "Signals and Systems"},
+    )
 
 
 # ============================================================
@@ -132,6 +192,8 @@ def get_suitable_rooms(event, strength=None):
 
     Rooms are ordered from best capacity fit to worst fit.
     """
+
+    ensure_default_scheduler_data()
 
     if strength is None:
         strength = event.expected_strength

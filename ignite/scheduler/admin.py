@@ -6,6 +6,7 @@ from .models import (
     Event,
     EventRegistration,
     BookingHistory,
+    RoomBookingPermission,
 )
 
 
@@ -86,6 +87,7 @@ class EventAdmin(admin.ModelAdmin):
         "booked_room",
         "status",
         "registration_closed",
+        "event_reminder_sent",
     )
 
     list_filter = (
@@ -93,6 +95,7 @@ class EventAdmin(admin.ModelAdmin):
         "status",
         "event_date",
         "registration_closed",
+        "event_reminder_sent",
     )
 
     search_fields = (
@@ -138,6 +141,14 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     readonly_fields = (
         "registered_at",
     )
+
+
+@admin.register(RoomBookingPermission)
+class RoomBookingPermissionAdmin(admin.ModelAdmin):
+    list_display = ("user", "is_active", "granted_by", "updated_at")
+    list_filter = ("is_active",)
+    search_fields = ("user__username", "user__email")
+    readonly_fields = ("created_at", "updated_at")
 
 
 # ============================================================

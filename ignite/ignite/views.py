@@ -1,6 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
+from scheduler.services import ensure_default_scheduler_data
+from scheduler.permissions import can_book_rooms, is_faculty, is_scheduler_admin
+
 def home(request):
     return render(request, 'home.html')
 
@@ -44,3 +47,22 @@ def dashboard(request):
         },
     ]
     return render(request, 'dashboard.html', {'recent_notifications': recent_notifications})
+
+
+@login_required
+def scheduler(request):
+    """Render the LHTC Scheduler workspace for authenticated users."""
+    ensure_default_scheduler_data()
+    if is_scheduler_admin(request.user):
+        scheduler_role = "admin"
+    elif is_faculty(request.user):
+        scheduler_role = "faculty"
+    elif can_book_rooms(request.user):
+        scheduler_role = "coordinator"
+    else:
+        scheduler_role = "student"
+    return render(request, 'scheduler.html', {
+        'scheduler_role': scheduler_role,
+        'scheduler_can_book': can_book_rooms(request.user),
+        'scheduler_is_admin': is_scheduler_admin(request.user),
+    })

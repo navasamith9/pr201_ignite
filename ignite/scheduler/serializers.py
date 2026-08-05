@@ -1,4 +1,7 @@
+from datetime import datetime
+
 from rest_framework import serializers
+from django.utils import timezone
 
 from .models import (
     Room,
@@ -62,6 +65,15 @@ class TimetableEntrySerializer(serializers.ModelSerializer):
 
         read_only_fields = ["id"]
 
+    def validate(self, attrs):
+        start_time = attrs.get("start_time", getattr(self.instance, "start_time", None))
+        end_time = attrs.get("end_time", getattr(self.instance, "end_time", None))
+        if start_time and end_time and start_time >= end_time:
+            raise serializers.ValidationError({
+                "end_time": "End time must be after start time."
+            })
+        return attrs
+
 
 # ============================================================
 # 3. EVENT SERIALIZER
@@ -122,6 +134,7 @@ class EventSerializer(serializers.ModelSerializer):
         read_only_fields = [
             "id",
             "created_by",
+            "coordinators",
             "booked_room",
             "status",
             "registration_closed",
@@ -168,8 +181,53 @@ class EventSerializer(serializers.ModelSerializer):
         ):
             raise serializers.ValidationError({
                 "expected_strength":
-                    "Expected strength must be greater than zero."
+                "Expected strength must be greater than zero."
             })
+
+        registration_deadline = attrs.get(
+            "registration_deadline",
+            getattr(self.instance, "registration_deadline", None),
+        )
+        event_date = attrs.get("event_date", getattr(self.instance, "event_date", None))
+
+        if (
+            "registration_deadline" in attrs
+            and registration_deadline
+            and registration_deadline <= timezone.now()
+        ):
+            raise serializers.ValidationError({
+                "registration_deadline":
+                "Registration deadline must be in the future."
+            })
+
+        if registration_deadline and event_date and start_time:
+            event_start = timezone.make_aware(
+                datetime.combine(event_date, start_time),
+                timezone.get_current_timezone(),
+            )
+            if event_start <= timezone.now():
+                raise serializers.ValidationError({
+                    "event_date": "Bookings can only be created or changed before the event starts."
+                })
+            if (
+                registration_deadline >= event_start
+                and not getattr(self.instance, "registration_closed", False)
+            ):
+                raise serializers.ValidationError({
+                    "registration_deadline":
+                    "Registration must close before the event starts."
+                })
+
+        branches = attrs.get("branches", getattr(self.instance, "branches", []))
+        if not isinstance(branches, list) or not all(isinstance(branch, str) for branch in branches):
+            raise serializers.ValidationError({"branches": "Use a list of branch names."})
+
+        years = attrs.get("years", getattr(self.instance, "years", []))
+        if (
+            not isinstance(years, list)
+            or not all(isinstance(year, int) and 1 <= year <= 5 for year in years)
+        ):
+            raise serializers.ValidationError({"years": "Use academic years from 1 to 5."})
 
         return attrs
 

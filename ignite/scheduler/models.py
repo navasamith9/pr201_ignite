@@ -236,6 +236,10 @@ class Event(models.Model):
     registration_reminder_sent = models.BooleanField(
        default=False
     )
+
+    event_reminder_sent = models.BooleanField(
+        default=False
+    )
     created_at = models.DateTimeField(
         auto_now_add=True
     )
@@ -301,7 +305,34 @@ class EventRegistration(models.Model):
 
 
 # ============================================================
-# 5. BOOKING HISTORY
+# 5. STUDENT COORDINATOR ACCESS
+# ============================================================
+
+class RoomBookingPermission(models.Model):
+    """An administrator-managed grant that lets a student book rooms."""
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="room_booking_permission",
+    )
+    granted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="scheduler_permission_grants",
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user} - {'active' if self.is_active else 'inactive'}"
+
+
+# ============================================================
+# 6. BOOKING HISTORY
 # ============================================================
 
 class BookingHistory(models.Model):
@@ -321,6 +352,8 @@ class BookingHistory(models.Model):
         ("RESCHEDULED", "Rescheduled"),
         ("CANCELLED", "Cancelled"),
         ("AUTO_ROOM_CHANGED", "Automatic Room Change"),
+        ("REGISTRATION_REMINDER_SENT", "Registration Reminder Sent"),
+        ("EVENT_REMINDER_SENT", "Event Reminder Sent"),
     ]
 
     event = models.ForeignKey(
