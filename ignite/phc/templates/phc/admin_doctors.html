@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block title %}Manage Doctors | PHC{% endblock %}
+{% block content %}<div class="container py-4">
+<div class="d-flex justify-content-between align-items-center mb-4"><div><a href="{% url 'phc:admin_dashboard' %}">← PHC admin</a><h1 class="mt-2">Doctors</h1></div><a class="btn btn-primary" href="{% url 'phc:admin_doctor_add' %}"><i class="bi bi-plus-lg"></i> Add doctor</a></div>
+<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Doctor</th><th>Institute email</th><th>Specialization / Room</th><th>Current status</th><th></th></tr></thead><tbody>{% for doctor in doctors %}<tr><td><strong>{{ doctor.name }}</strong></td><td>{{ doctor.email }}</td><td>{{ doctor.specialization }}<small class="d-block text-muted">{{ doctor.room }}</small></td><td>{{ doctor.get_status_display }}</td><td class="text-nowrap"><a class="btn btn-sm btn-outline-primary" href="{% url 'phc:admin_doctor_edit' doctor.id %}">Edit details</a></td></tr>{% empty %}<tr><td colspan="5">Add your first PHC doctor.</td></tr>{% endfor %}</tbody></table></div></div>{% endblock %}

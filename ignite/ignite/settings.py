@@ -107,8 +107,10 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'  # Google already verified it
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APP': {
-            'client_id': config('GOOGLE_CLIENT_ID'),
-            'secret': config('GOOGLE_CLIENT_SECRET'),
+            # OAuth is optional for local development.  Supply these through
+            # environment variables before enabling Google sign-in in production.
+            'client_id': config('GOOGLE_CLIENT_ID', default=''),
+            'secret': config('GOOGLE_CLIENT_SECRET', default=''),
             'key': ''
         },
         'SCOPE': ['profile', 'email'],

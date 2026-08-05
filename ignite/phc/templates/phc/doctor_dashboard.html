@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Doctor Portal | PHC{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="alert alert-danger mb-4"><strong>Emergency contacts:</strong> PHC {{ settings.phc_phone|default:'emergency desk' }}{% if settings.ambulance_phone %} · Ambulance {{ settings.ambulance_phone }}{% endif %}{% if settings.security_phone %} · Security {{ settings.security_phone }}{% endif %}. Do not delay emergency care.</div>
+    {% for announcement in announcements %}<div class="alert alert-warning mb-3"><strong>{{ announcement.title }}</strong> — {{ announcement.message }}</div>{% endfor %}
+    <div class="mb-4"><span class="text-danger fw-bold">DOCTOR PORTAL</span><h1>{{ doctor.name }}</h1><p class="text-muted">{{ doctor.specialization }} · {{ doctor.room }}</p></div>
+    <section class="card shadow-sm mb-4" style="max-width: 720px"><div class="card-body">
+        <h2 class="h4">Are you accepting appointments?</h2>
+        <p class="text-muted">Students can book appointments only while you are active.</p>
+        <form method="post" action="{% url 'phc:update_status' %}" class="d-flex flex-wrap gap-2 align-items-center">{% csrf_token %}
+            <select name="status" class="form-select" style="max-width: 280px">
+                <option value="available" {% if doctor.status == 'available' %}selected{% endif %}>Active — accepting appointments</option>
+                <option value="unavailable" {% if doctor.status != 'available' %}selected{% endif %}>Not active — unavailable</option>
+            </select>
+            <button class="btn btn-primary">Save status</button>
+        </form>
+    </div></section>
+    <section><div class="d-flex justify-content-between align-items-center"><h2 class="h4">My patient appointments</h2><span class="badge bg-primary">{{ waiting_count }} waiting</span></div>
+        <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Token</th><th>Student</th><th>Booked at</th><th>Status</th><th></th></tr></thead><tbody>{% for entry in entries %}<tr><td>{{ entry.token_number }}</td><td>{{ entry.student.get_full_name|default:entry.student.username }}</td><td>{{ entry.joined_at|date:'d M, g:i A' }}</td><td><span class="badge {% if entry.status == 'called' %}bg-warning text-dark{% else %}bg-primary{% endif %}">{{ entry.get_status_display }}</span></td><td>{% if entry.status == 'called' %}<form method="post" action="{% url 'phc:queue_action' entry.id %}">{% csrf_token %}<button name="action" value="complete" class="btn btn-sm btn-success">Mark completed</button></form>{% elif forloop.first and not called_entry %}<form method="post" action="{% url 'phc:queue_action' entry.id %}">{% csrf_token %}<button name="action" value="call" class="btn btn-sm btn-primary">Call patient</button></form>{% endif %}</td></tr>{% empty %}<tr><td colspan="5">No students have booked an appointment with you.</td></tr>{% endfor %}</tbody></table></div>
+    </section>
+</div>
+{% endblock %}
+{% block extra_scripts %}<script>setTimeout(()=>location.reload(),30000)</script>{% endblock %}
