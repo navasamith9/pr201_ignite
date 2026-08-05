@@ -12,6 +12,7 @@ class DoctorProfile(models.Model):
     # A profile may be published before a doctor is provisioned a login account.
     # The optional user link is used only for the private doctor portal.
     name = models.CharField(max_length=120)
+    email = models.EmailField(unique=True, null=True, blank=True)
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -25,7 +26,6 @@ class DoctorProfile(models.Model):
     status_updated_at = models.DateTimeField(auto_now=True)
     expected_availability = models.CharField(max_length=160, blank=True)
     accepting_patients = models.BooleanField(default=True)
-    active = models.BooleanField(default=True)
 
     class Meta:
         ordering = ['name']
@@ -35,7 +35,7 @@ class DoctorProfile(models.Model):
 
     @property
     def is_joinable(self):
-        return self.active and self.status == self.Status.AVAILABLE and self.accepting_patients
+        return self.status == self.Status.AVAILABLE and self.accepting_patients
 
 
 class DoctorSchedule(models.Model):
@@ -66,7 +66,9 @@ class ConsultationQueue(models.Model):
         WAITING = 'waiting', 'Waiting'; CALLED = 'called', 'Called'; COMPLETED = 'completed', 'Completed'; SKIPPED = 'skipped', 'Skipped'; CANCELLED = 'cancelled', 'Cancelled'
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='phc_queue_entries')
     doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE, related_name='queue_entries')
-    token_number = models.PositiveIntegerField()
+    # Completed/cancelled entries release their token, while active entries
+    # keep a compact, live queue number.
+    token_number = models.PositiveIntegerField(blank=True, null=True)
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.WAITING)
     joined_at = models.DateTimeField(auto_now_add=True)
     called_at = models.DateTimeField(blank=True, null=True)

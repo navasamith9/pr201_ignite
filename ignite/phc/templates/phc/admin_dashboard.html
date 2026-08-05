@@ -1,1 +1,40 @@
-﻿{% extends 'base.html' %}{% block title %}PHC Admin{% endblock %}{% block content %}<div class="container py-4"><h1>PHC administration</h1><div class="row g-3 mb-4"><div class="col-md-3"><div class="card card-body"><strong>{{ available }}</strong> Doctors available</div></div><div class="col-md-3"><div class="card card-body"><strong>{{ doctors.count }}</strong> Doctor profiles</div></div><div class="col-md-3"><div class="card card-body"><strong>{{ waiting }}</strong> Students waiting</div></div><div class="col-md-3"><div class="card card-body"><strong>{{ subscriptions }}</strong> Active alerts</div></div></div><p>Manage doctors, schedules, announcements, emergency contacts, queues, and audit logs in <a href="/admin/phc/">Django Admin</a>.</p><table class="table"><thead><tr><th>Doctor</th><th>Specialization</th><th>Status</th><th>Queue</th></tr></thead><tbody>{% for doctor in doctors %}<tr><td>{{ doctor }}</td><td>{{ doctor.specialization }}</td><td>{{ doctor.get_status_display }}</td><td>{{ doctor.queue_entries.count }}</td></tr>{% endfor %}</tbody></table></div>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}PHC Admin | Ignite{% endblock %}
+{% block extra_head %}<style>
+.phc-admin-hero { background: linear-gradient(120deg, #fff5f5, #f5f9ff); border: 1px solid #e7edf5; }
+.phc-management-card { color: #1f2b3d; transition: transform .16s ease, box-shadow .16s ease; }
+.phc-management-card:hover { color: #1f2b3d; transform: translateY(-3px); box-shadow: 0 .65rem 1.4rem rgba(31, 43, 61, .12) !important; }
+.phc-management-card strong { margin-top: .85rem; font-size: 1rem; }.phc-management-card small { color: #6c7789; line-height: 1.45; margin-top: .28rem; }.phc-management-icon { display: grid; place-items: center; width: 2.65rem; height: 2.65rem; border-radius: .75rem; font-size: 1.3rem; }
+</style>{% endblock %}
+{% block content %}
+<div class="container py-4 pb-5">
+    <div class="phc-admin-hero rounded-4 p-4 p-md-5 mb-4">
+        <span class="text-danger fw-bold small text-uppercase">PHC administration</span>
+        <h1 class="mt-2 mb-2">Primary Health Centre workspace</h1>
+        <p class="mb-0 text-muted">Keep doctor availability, student appointments, and essential PHC information up to date.</p>
+    </div>
+
+    <section class="mb-5" aria-labelledby="overview-title">
+        <div class="d-flex align-items-baseline justify-content-between mb-3"><div><h2 id="overview-title" class="h3 mb-1">Live overview</h2><p class="text-muted mb-0">Current PHC activity — these values update as users act.</p></div></div>
+        <div class="row g-3">
+            <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm h-100"><div class="card-body"><i class="bi bi-check-circle text-success fs-4"></i><strong class="d-block fs-2 mt-2">{{ available }}</strong><span class="text-muted">Doctors available</span></div></div></div>
+            <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm h-100"><div class="card-body"><i class="bi bi-person-vcard text-primary fs-4"></i><strong class="d-block fs-2 mt-2">{{ doctors.count }}</strong><span class="text-muted">Doctor profiles</span></div></div></div>
+            <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm h-100"><div class="card-body"><i class="bi bi-people text-warning fs-4"></i><strong class="d-block fs-2 mt-2">{{ waiting }}</strong><span class="text-muted">Students waiting</span></div></div></div>
+            <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm h-100"><div class="card-body"><i class="bi bi-bell text-danger fs-4"></i><strong class="d-block fs-2 mt-2">{{ subscriptions }}</strong><span class="text-muted">Availability alerts</span></div></div></div>
+        </div>
+    </section>
+
+    <section class="mb-5" aria-labelledby="manage-title">
+        <div class="mb-3"><h2 id="manage-title" class="h3 mb-1">Manage PHC</h2><p class="text-muted mb-0">Choose a task to update the information shown to students and doctors.</p></div>
+        <div class="row g-3">
+            <div class="col-md-6 col-xl-4"><a class="phc-management-card card card-body h-100 border-0 shadow-sm text-decoration-none" href="{% url 'phc:admin_doctors' %}"><span class="phc-management-icon bg-primary-subtle text-primary"><i class="bi bi-person-plus"></i></span><strong>Add & manage doctors</strong><small>Names, institute emails, specialization and rooms.</small><i class="bi bi-arrow-right ms-auto"></i></a></div>
+            <div class="col-md-6 col-xl-4"><a class="phc-management-card card card-body h-100 border-0 shadow-sm text-decoration-none" href="{% url 'phc:admin_schedules' %}"><span class="phc-management-icon bg-success-subtle text-success"><i class="bi bi-calendar-week"></i></span><strong>Consultation schedules</strong><small>Set each doctor’s regular PHC timings.</small><i class="bi bi-arrow-right ms-auto"></i></a></div>
+            <div class="col-md-6 col-xl-4"><a class="phc-management-card card card-body h-100 border-0 shadow-sm text-decoration-none" href="{% url 'phc:admin_announcements' %}"><span class="phc-management-icon bg-warning-subtle text-warning"><i class="bi bi-megaphone"></i></span><strong>Announcements</strong><small>Visible immediately to students and doctors.</small><i class="bi bi-arrow-right ms-auto"></i></a></div>
+            <div class="col-md-6 col-xl-4"><a class="phc-management-card card card-body h-100 border-0 shadow-sm text-decoration-none" href="{% url 'phc:admin_settings' %}"><span class="phc-management-icon bg-danger-subtle text-danger"><i class="bi bi-telephone"></i></span><strong>Emergency information</strong><small>PHC hours, emergency numbers and hospital details.</small><i class="bi bi-arrow-right ms-auto"></i></a></div>
+            <div class="col-md-6 col-xl-4"><a class="phc-management-card card card-body h-100 border-0 shadow-sm text-decoration-none" href="{% url 'phc:admin_queue' %}"><span class="phc-management-icon bg-info-subtle text-info"><i class="bi bi-people"></i></span><strong>Live consultation queues</strong><small>Review and remove invalid queue entries.</small><i class="bi bi-arrow-right ms-auto"></i></a></div>
+        </div>
+    </section>
+
+    <section><h2 class="h4 mb-3">Current doctor availability</h2><div class="card border-0 shadow-sm"><div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th class="ps-3">Doctor</th><th>Specialization</th><th>Status</th><th class="pe-3">Students waiting</th></tr></thead><tbody>{% for doctor in doctors %}<tr><td class="ps-3">{{ doctor }}</td><td>{{ doctor.specialization }}</td><td><span class="badge {% if doctor.status == 'available' %}bg-success{% else %}bg-secondary{% endif %}">{{ doctor.get_status_display }}</span></td><td class="pe-3">{{ doctor.queue_entries.count }}</td></tr>{% empty %}<tr><td colspan="4" class="text-center py-4 text-muted">No doctor profiles have been added.</td></tr>{% endfor %}</tbody></table></div></div></section>
+</div>
+{% endblock %}
