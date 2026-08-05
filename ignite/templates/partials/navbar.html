@@ -40,8 +40,15 @@
     <aside class="ignite-sidebar" data-sidebar aria-label="Campus services">
         <div class="ignite-sidebar-heading">Campus services</div>
         <nav class="ignite-sidebar-nav">
-            <a href="{% url 'scheduler' %}"><i class="bi bi-calendar2-week"></i><span>LHTC Scheduler</span></a>
-            <a href="{% url 'dashboard' %}#phc"><i class="bi bi-heart-pulse"></i><span>PHC</span></a>
+            <a href="{% url 'scheduler' %}">
+                <i class="bi bi-calendar2-week"></i>
+                <span>LHTC Scheduler</span>
+            </a>
+
+            <a href="{% url 'phc:home' %}">
+                <i class="bi bi-heart-pulse"></i>
+                <span>PHC</span>
+            </a>
             <a href="{% url 'bus:dashboard' %}"><i class="bi bi-bus-front"></i><span>Bus</span></a>
             <a href="{% url 'dashboard' %}#canteen"><i class="bi bi-cup-hot"></i><span>Canteen</span></a>
             <a href="{% url 'dashboard' %}#chatbot"><i class="bi bi-chat-square-dots"></i><span>Chatbot</span></a>
