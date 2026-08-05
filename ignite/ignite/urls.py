@@ -22,12 +22,17 @@ from . import views
 urlpatterns = [
     path('', views.home, name='home'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('scheduler/', views.scheduler, name='scheduler'),
     path('admin/', admin.site.urls),
+
     path('accounts/', include('allauth.urls')),
     path('accounts/', include('accounts.urls')),
     path('bus/', include('bus.urls')),
     path('payments/', include('payments.urls')),
     path('lost-and-found/', include('lost_and_found.urls')),
+
+    path('api/scheduler/', include('scheduler.urls')),
+
 ]
 
 if settings.DEBUG:

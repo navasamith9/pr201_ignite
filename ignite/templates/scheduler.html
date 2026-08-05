@@ -1,0 +1,379 @@
+{% extends 'base.html' %}
+{% block title %}LHTC Scheduler | Ignite{% endblock %}
+{% block content %}
+<section class="scheduler-page{% if scheduler_role == 'student' %} scheduler-page--student{% endif %}" data-role="{{ scheduler_role }}">
+    <header class="scheduler-header">
+        <div>
+            <span class="ignite-eyebrow"><i class="bi bi-calendar2-week"></i> Lecture Hall &amp; Timetable Coordination</span>
+            <h1>LHTC Scheduler</h1>
+            {% if scheduler_can_book %}
+                <p id="scheduler-intro">Find a clash-free room, confirm the booking, and keep participants informed.</p>
+            {% else %}
+                <p id="scheduler-intro">Discover campus events, register in time, and keep up with booking updates.</p>
+            {% endif %}
+        </div>
+        <div class="scheduler-header-actions">
+            {% if scheduler_role == "coordinator" %}
+                <label class="scheduler-role-select" for="scheduler-view"><i class="bi bi-person-badge"></i><span>View as</span><select id="scheduler-view" aria-label="Choose scheduler view"><option value="student">Student</option><option value="coordinator">Coordinator</option></select></label>
+            {% else %}
+                <span class="scheduler-role-pill"><i class="bi bi-person-badge"></i> {{ scheduler_role|title }}</span>
+            {% endif %}
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-primary"><i class="bi bi-grid-1x2"></i><span>Dashboard</span></a>
+        </div>
+    </header>
+
+    <div id="scheduler-message" class="alert d-none" role="status"></div>
+
+    {% if scheduler_can_book %}
+    <section class="scheduler-workbench" data-coordinator-workspace aria-labelledby="booking-heading">
+        <div class="scheduler-form-panel">
+            <div class="scheduler-section-heading">
+                <div>
+                    <span class="ignite-eyebrow">Room booking</span>
+                    <h2 id="booking-heading">Check availability</h2>
+                </div>
+                <span class="scheduler-one-day-note"><i class="bi bi-calendar-day"></i> One-day bookings</span>
+            </div>
+            <form id="scheduler-form" class="scheduler-form">
+                {% csrf_token %}
+                <div class="scheduler-form-grid">
+                    <div class="scheduler-field scheduler-field--wide"><label for="title">Event title</label><input id="title" class="form-control" maxlength="200" required></div>
+                    <div class="scheduler-field"><label for="event-type">Event type</label><select id="event-type" class="form-select"><option value="CLUB">Club event</option><option value="EXTRA_CLASS">Extra class</option><option value="EXAM">Exam</option><option value="MEETING">Meeting</option><option value="WORKSHOP">Workshop</option><option value="SEMINAR">Seminar</option><option value="OTHER">Other</option></select></div>
+                    <div class="scheduler-field"><label for="strength">Expected attendees</label><input id="strength" class="form-control" type="number" min="1" required></div>
+                    <div class="scheduler-field scheduler-field--wide"><label for="purpose">Purpose</label><input id="purpose" class="form-control" required></div>
+                    <div class="scheduler-field"><label for="event-date">Event date</label><input id="event-date" class="form-control" type="date" required></div>
+                    <div class="scheduler-field"><label for="deadline">Registration closes</label><input id="deadline" class="form-control" type="datetime-local" required></div>
+                    <div class="scheduler-field"><label for="start-time">Start time</label><input id="start-time" class="form-control" type="time" required></div>
+                    <div class="scheduler-field"><label for="end-time">End time</label><input id="end-time" class="form-control" type="time" required></div>
+                    <div class="scheduler-field"><label for="branches">Audience branches</label><input id="branches" class="form-control" placeholder="All branches"></div>
+                    <div class="scheduler-field"><label for="years">Audience years</label><input id="years" class="form-control" placeholder="All years"></div>
+                    <div class="scheduler-field scheduler-field--wide"><label for="coordinator-emails">Co-coordinator emails</label><input id="coordinator-emails" class="form-control" placeholder="Optional, comma-separated institute emails"></div>
+                </div>
+                <fieldset class="scheduler-facilities">
+                    <legend>Required facilities</legend>
+                    <div class="scheduler-checks">
+                        <label><input type="checkbox" id="projector"> Projector</label>
+                        <label><input type="checkbox" id="ac"> AC</label>
+                        <label><input type="checkbox" id="wifi"> Wi-Fi</label>
+                        <label><input type="checkbox" id="audio"> Audio system</label>
+                        <label><input type="checkbox" id="smart-board"> Smart board</label>
+                    </div>
+                </fieldset>
+                <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i><span>Find suitable rooms</span></button>
+            </form>
+        </div>
+        <aside class="scheduler-results-panel" aria-live="polite">
+            <div class="scheduler-section-heading">
+                <div>
+                    <span class="ignite-eyebrow">Recommendation</span>
+                    <h2>Available rooms</h2>
+                </div>
+                <i class="bi bi-stars scheduler-heading-icon" aria-hidden="true"></i>
+            </div>
+            <p id="recommendation-empty" class="scheduler-empty">Search with an event date and times to see the best available rooms.</p>
+            <div id="recommendations" class="scheduler-item-list"></div>
+        </aside>
+    </section>
+    {% endif %}
+
+    <section class="scheduler-overview">
+        <div class="scheduler-list-panel scheduler-notifications-panel">
+            <div class="scheduler-section-heading">
+                <div>
+                    <span class="ignite-eyebrow">Updates</span>
+                    <h2>Reminders &amp; changes</h2>
+                </div>
+            </div>
+            <p id="notifications-empty" class="scheduler-empty">No booking updates yet.</p>
+            <div id="notifications" class="scheduler-item-list"></div>
+        </div>
+        <div class="scheduler-event-columns">
+        <div class="scheduler-list-panel">
+            <div class="scheduler-section-heading">
+                <div>
+                    <span class="ignite-eyebrow">Your activity</span>
+                    <h2 id="mine-heading">{% if scheduler_role == "admin" %}All bookings{% elif scheduler_can_book %}My bookings{% else %}Registered events{% endif %}</h2>
+                </div>
+            </div>
+            <p id="mine-empty" class="scheduler-empty">Loading your events.</p>
+            <div id="my-events" class="scheduler-item-list"></div>
+        </div>
+        <div class="scheduler-list-panel">
+            <div class="scheduler-section-heading">
+                <div>
+                    <span class="ignite-eyebrow">Campus schedule</span>
+                    <h2 id="campus-heading">{% if scheduler_can_book %}All events{% else %}New events{% endif %}</h2>
+                </div>
+            </div>
+            <p id="campus-empty" class="scheduler-empty">Loading upcoming events.</p>
+            <div id="campus-events" class="scheduler-item-list"></div>
+        </div>
+        </div>
+    </section>
+
+    {% if scheduler_is_admin %}
+    <section class="scheduler-admin-panel" aria-labelledby="coordinator-access-heading">
+        <div class="scheduler-section-heading">
+            <div>
+                <span class="ignite-eyebrow">Administrator</span>
+                <h2 id="coordinator-access-heading">Student coordinator access</h2>
+            </div>
+        </div>
+        <form id="coordinator-form" class="scheduler-access-form">
+            <label for="coordinator-email">Student institute email</label>
+            <input id="coordinator-email" class="form-control" type="email" placeholder="student@iiitdmj.ac.in" required>
+            <button class="btn btn-primary" type="submit"><i class="bi bi-person-plus"></i><span>Grant access</span></button>
+        </form>
+        <p id="coordinators-empty" class="scheduler-empty">No student coordinator access has been granted.</p>
+        <div id="coordinator-permission-list" class="scheduler-item-list"></div>
+    </section>
+    {% endif %}
+</section>
+
+<div class="modal fade" id="booking-editor" tabindex="-1" aria-labelledby="booking-editor-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form id="booking-editor-form" class="modal-content">
+            <div class="modal-header"><h2 id="booking-editor-title" class="modal-title fs-5">Change booking</h2><button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button></div>
+            <div class="modal-body scheduler-form-grid">
+                <div class="scheduler-field"><label for="edit-date">Event date</label><input id="edit-date" class="form-control" type="date" required></div>
+                <div class="scheduler-field"><label for="edit-strength">Expected attendees</label><input id="edit-strength" class="form-control" type="number" min="1" required></div>
+                <div class="scheduler-field"><label for="edit-start">Start time</label><input id="edit-start" class="form-control" type="time" required></div>
+                <div class="scheduler-field"><label for="edit-end">End time</label><input id="edit-end" class="form-control" type="time" required></div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-coreui-dismiss="modal">Close</button><button type="submit" class="btn btn-primary"><i class="bi bi-arrow-repeat"></i><span>Update booking</span></button></div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block extra_head %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const root = '/api/scheduler/';
+    const page = document.querySelector('.scheduler-page');
+    let canBook = {{ scheduler_can_book|yesno:'true,false' }};
+    const schedulerRole = '{{ scheduler_role }}';
+    const isAdmin = {{ scheduler_is_admin|yesno:'true,false' }};
+    const csrfToken = () => {
+        const cookie = document.cookie
+            .split('; ')
+            .find(item => item.startsWith('csrftoken='))
+            ?.split('=')[1];
+        return cookie ? decodeURIComponent(cookie) : document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+    };
+    const message = document.getElementById('scheduler-message');
+    const editorElement = document.getElementById('booking-editor');
+    const editor = new coreui.Modal(editorElement);
+    let searchedPayload = null;
+    let editingEventId = null;
+    const viewSelector = document.getElementById('scheduler-view');
+    let activeView = schedulerRole === 'coordinator'
+        ? localStorage.getItem('scheduler-coordinator-view') || 'student'
+        : schedulerRole;
+    const studentView = () => schedulerRole === 'coordinator' && activeView === 'student';
+    const attendeeView = () => schedulerRole === 'student' || studentView();
+    const coordinatorView = () => canBook && !studentView();
+
+    const applyView = () => {
+        page.classList.toggle('scheduler-student-view', attendeeView());
+        page.classList.toggle('scheduler-access-revoked', schedulerRole === 'coordinator' && !canBook);
+        if (viewSelector) viewSelector.value = activeView;
+        document.getElementById('scheduler-intro').textContent = attendeeView()
+            ? 'Discover campus events, register in time, and keep up with booking updates.'
+            : 'Find a clash-free room, confirm the booking, and keep participants informed.';
+        document.getElementById('mine-heading').textContent = attendeeView() ? 'Registered events' : (schedulerRole === 'admin' ? 'All bookings' : 'My bookings');
+        document.getElementById('campus-heading').textContent = attendeeView() ? 'New events' : 'All events';
+    };
+
+    const request = async (path, options = {}) => {
+        const response = await fetch(root + path, {credentials: 'same-origin', ...options, headers: {'X-CSRFToken': csrfToken(), ...(options.headers || {})}});
+        const data = response.status === 204 ? null : await response.json();
+        if (!response.ok) {
+            const details = typeof data === 'object' ? Object.values(data).flat().join(' ') : 'Request failed.';
+            throw new Error(details || 'Request failed.');
+        }
+        return data;
+    };
+    const setMessage = (text, tone = 'success') => {
+        message.textContent = text;
+        message.className = `alert alert-${tone}`;
+        message.classList.remove('d-none');
+        message.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+    };
+    const clearMessage = () => message.classList.add('d-none');
+    const time = value => value ? value.slice(0, 5) : '';
+    const roomName = event => event.booked_room_details ? event.booked_room_details.name : 'Room pending';
+    const eventDetail = event => `${event.event_date} | ${time(event.start_time)}-${time(event.end_time)} | ${roomName(event)}`;
+    const registrationIsOpen = event => event.status === 'BOOKED' && !event.registration_closed && new Date(event.registration_deadline) > new Date() && new Date(`${event.event_date}T${event.start_time}`) > new Date();
+    const text = (tag, value, className = '') => { const node = document.createElement(tag); node.textContent = value; if (className) node.className = className; return node; };
+    const statusBadge = status => text('span', status, `badge text-bg-${status === 'BOOKED' ? 'success' : status === 'CANCELLED' ? 'danger' : 'secondary'}`);
+    const emptyState = (id, empty) => document.getElementById(id).classList.toggle('d-none', !empty);
+    const parseBranches = value => value.split(',').map(part => part.trim()).filter(Boolean);
+    const parseYears = value => value.split(',').map(part => Number(part.trim())).filter(Number.isInteger);
+
+    const eventRow = (event, actions = []) => {
+        const row = document.createElement('article');
+        row.className = 'scheduler-item';
+        const copy = document.createElement('div');
+        const heading = document.createElement('div'); heading.className = 'scheduler-item-title';
+        heading.append(text('strong', event.title), statusBadge(event.status));
+        copy.append(heading, text('p', eventDetail(event), 'scheduler-item-detail'));
+        if (event.registered_strength !== undefined) copy.append(text('p', `${event.registered_strength} registered`, 'scheduler-item-meta'));
+        row.append(copy);
+        if (actions.length) { const actionRow = document.createElement('div'); actionRow.className = 'scheduler-item-actions'; actions.forEach(action => actionRow.append(action)); row.append(actionRow); }
+        return row;
+    };
+    const actionButton = (label, icon, tone, handler) => {
+        const button = document.createElement('button'); button.type = 'button'; button.className = `btn btn-sm btn-${tone}`;
+        button.append(text('i', '', `bi bi-${icon}`), text('span', label)); button.addEventListener('click', handler); return button;
+    };
+
+    const showRecommendations = (recommendations, payload = null, eventId = null) => {
+        const list = document.getElementById('recommendations');
+        const empty = document.getElementById('recommendation-empty');
+        list.replaceChildren(); empty.classList.toggle('d-none', recommendations.length > 0);
+        if (!recommendations.length) { empty.textContent = 'No active room matches this date, time, capacity, and facilities.'; return; }
+        recommendations.forEach(item => {
+            const row = document.createElement('article'); row.className = 'scheduler-item scheduler-room-result';
+            const copy = document.createElement('div'); copy.append(text('strong', item.room.name), text('p', `${item.room.building || 'Campus'} | Capacity ${item.room.capacity} | ${item.unused_seats} seats free`, 'scheduler-item-detail'));
+            const button = actionButton('Book room', 'calendar-check', 'primary', async () => {
+                try {
+                    clearMessage(); button.disabled = true;
+                    if (payload) await request('events/create/', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({...payload, room_id: item.room.id})});
+                    else await request(`events/${eventId}/book/`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({room_id: item.room.id})});
+                    list.replaceChildren(); empty.classList.remove('d-none'); empty.textContent = 'Booking confirmed. Search again for another event.';
+                    document.getElementById('scheduler-form')?.reset(); searchedPayload = null;
+                    await refresh(); setMessage('Room booked and event published. Participants have been notified.');
+                } catch (error) { button.disabled = false; setMessage(error.message, 'danger'); }
+            });
+            row.append(copy, button); list.append(row);
+        });
+    };
+
+    const loadMine = async () => {
+        const list = document.getElementById('my-events'); const empty = 'mine-empty';
+        try {
+            const events = await request(`events/${studentView() ? '?view=student' : ''}`); list.replaceChildren(); emptyState(empty, events.length === 0);
+            events.forEach(event => {
+                const actions = [];
+                if (attendeeView() && registrationIsOpen(event)) {
+                    actions.push(actionButton('Unregister', 'person-dash', 'outline-primary', async () => {
+                        try { await request(`events/${event.id}/unregister/`, {method: 'DELETE'}); await refresh(); setMessage('Your registration was cancelled.'); } catch (error) { setMessage(error.message, 'danger'); }
+                    }));
+                }
+                if (coordinatorView() && event.status !== 'CANCELLED') {
+                    actions.push(actionButton('Change', 'pencil-square', 'outline-primary', () => openEditor(event)));
+                    actions.push(actionButton('Cancel', 'x-circle', 'outline-danger', async () => {
+                        if (!window.confirm(`Cancel ${event.title}?`)) return;
+                        try { await request(`events/${event.id}/cancel/`, {method: 'POST'}); await refresh(); setMessage('Booking cancelled and registered students notified.'); } catch (error) { setMessage(error.message, 'danger'); }
+                    }));
+                }
+                if (coordinatorView() && event.status === 'DRAFT') actions.push(actionButton('Find rooms', 'search', 'outline-primary', async () => {
+                    try { const data = await request(`events/${event.id}/recommend/`); showRecommendations(data.recommended_rooms, null, event.id); } catch (error) { setMessage(error.message, 'danger'); }
+                }));
+                list.append(eventRow(event, actions));
+            });
+        } catch (error) { document.getElementById(empty).textContent = 'Unable to load your events.'; }
+    };
+
+    const loadCampus = async () => {
+        const list = document.getElementById('campus-events'); const empty = 'campus-empty';
+        try {
+            const events = await request(`events/campus/${studentView() ? '?view=student' : ''}`);
+            const newEvents = attendeeView() ? events.filter(event => !event.is_registered) : events;
+            list.replaceChildren(); emptyState(empty, newEvents.length === 0);
+            newEvents.forEach(event => {
+                const actions = [];
+                if (attendeeView() && event.registration_open) {
+                    const label = event.is_registered ? 'Unregister' : 'Register';
+                    actions.push(actionButton(label, event.is_registered ? 'person-dash' : 'person-plus', 'outline-primary', async () => {
+                        try { await request(`events/${event.id}/${event.is_registered ? 'unregister' : 'register'}/`, {method: event.is_registered ? 'DELETE' : 'POST'}); await refresh(); setMessage(event.is_registered ? 'Your registration was cancelled.' : 'You are registered for this event.'); } catch (error) { setMessage(error.message, 'danger'); }
+                    }));
+                } else if (attendeeView()) {
+                    const closed = actionButton('Registration closed', 'lock', 'outline-secondary', () => {});
+                    closed.disabled = true;
+                    actions.push(closed);
+                }
+                list.append(eventRow(event, actions));
+            });
+        } catch (error) { document.getElementById(empty).textContent = 'Unable to load campus events.'; }
+    };
+
+    const loadNotifications = async () => {
+        const list = document.getElementById('notifications'); const empty = 'notifications-empty';
+        try {
+            const items = await request(`notifications/${studentView() ? '?view=student' : ''}`); list.replaceChildren(); emptyState(empty, items.length === 0);
+            items.forEach(item => {
+                const row = document.createElement('article'); row.className = 'scheduler-item';
+                const oldRoom = item.old_room_name ? ` from ${item.old_room_name}` : '';
+                const newRoom = item.new_room_name ? ` to ${item.new_room_name}` : '';
+                row.append(text('strong', item.event_title), text('p', `${item.action.replaceAll('_', ' ').toLowerCase()}${oldRoom}${newRoom}`, 'scheduler-item-detail'), text('p', new Date(item.created_at).toLocaleString(), 'scheduler-item-meta'));
+                list.append(row);
+            });
+        } catch (error) { document.getElementById(empty).textContent = 'Unable to load updates.'; }
+    };
+
+    const loadCoordinatorPermissions = async () => {
+        if (!isAdmin) return;
+        const list = document.getElementById('coordinator-permission-list'); const empty = 'coordinators-empty';
+        try {
+            const items = await request('coordinator-permissions/'); list.replaceChildren(); emptyState(empty, items.filter(item => item.is_active).length === 0);
+            items.filter(item => item.is_active).forEach(item => {
+                const revoke = actionButton('Revoke', 'person-dash', 'outline-danger', async () => {
+                    try { await request(`coordinator-permissions/${item.id}/`, {method: 'DELETE'}); await loadCoordinatorPermissions(); setMessage(`Booking access removed for ${item.email}.`); } catch (error) { setMessage(error.message, 'danger'); }
+                });
+                const row = document.createElement('article'); row.className = 'scheduler-item'; row.append(text('div', `${item.name} | ${item.email}`), revoke); list.append(row);
+            });
+        } catch (error) { document.getElementById(empty).textContent = 'Unable to load coordinator access.'; }
+    };
+
+    const openEditor = event => {
+        editingEventId = event.id; document.getElementById('edit-date').value = event.event_date; document.getElementById('edit-strength').value = event.expected_strength; document.getElementById('edit-start').value = time(event.start_time); document.getElementById('edit-end').value = time(event.end_time); editor.show();
+    };
+    const loadAccess = async () => {
+        const access = await request('access/');
+        if (schedulerRole === 'coordinator' && canBook && !access.can_book_rooms) {
+            canBook = false;
+            activeView = 'student';
+            localStorage.setItem('scheduler-coordinator-view', activeView);
+            applyView();
+            setMessage('Coordinator booking access has been removed. You are now in Student view.', 'warning');
+        }
+    };
+    const refresh = async () => {
+        try { await loadAccess(); } catch (error) { /* Keep the currently rendered permission state. */ }
+        return Promise.all([loadMine(), loadCampus(), loadNotifications(), loadCoordinatorPermissions()]);
+    };
+
+    document.getElementById('scheduler-form')?.addEventListener('submit', async event => {
+        event.preventDefault(); clearMessage();
+        const payload = {
+            title: document.getElementById('title').value.trim(), event_type: document.getElementById('event-type').value, purpose: document.getElementById('purpose').value.trim(), expected_strength: Number(document.getElementById('strength').value), branches: parseBranches(document.getElementById('branches').value), years: parseYears(document.getElementById('years').value), coordinator_emails: document.getElementById('coordinator-emails').value, event_date: document.getElementById('event-date').value, start_time: document.getElementById('start-time').value, end_time: document.getElementById('end-time').value, registration_deadline: new Date(document.getElementById('deadline').value).toISOString(), require_projector: document.getElementById('projector').checked, require_ac: document.getElementById('ac').checked, require_wifi: document.getElementById('wifi').checked, require_audio_system: document.getElementById('audio').checked, require_smart_board: document.getElementById('smart-board').checked,
+        };
+        try { const data = await request('events/availability/', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)}); searchedPayload = payload; showRecommendations(data.recommended_rooms, searchedPayload); } catch (error) { setMessage(error.message, 'danger'); }
+    });
+
+    document.getElementById('booking-editor-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        try {
+            await request(`events/${editingEventId}/reschedule/`, {method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({event_date: document.getElementById('edit-date').value, expected_strength: Number(document.getElementById('edit-strength').value), start_time: document.getElementById('edit-start').value, end_time: document.getElementById('edit-end').value})});
+            editor.hide(); await refresh(); setMessage('Booking updated and the best available room recalculated.');
+        } catch (error) { setMessage(error.message, 'danger'); }
+    });
+
+    document.getElementById('coordinator-form')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        try { const email = document.getElementById('coordinator-email').value; await request('coordinator-permissions/', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email})}); event.target.reset(); await loadCoordinatorPermissions(); setMessage(`Booking access granted to ${email}.`); } catch (error) { setMessage(error.message, 'danger'); }
+    });
+
+    viewSelector?.addEventListener('change', async event => {
+        activeView = event.target.value;
+        localStorage.setItem('scheduler-coordinator-view', activeView);
+        applyView();
+        await refresh();
+    });
+
+    applyView();
+    refresh();
+});
+</script>
+{% endblock %}

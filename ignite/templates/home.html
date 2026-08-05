@@ -28,7 +28,7 @@
     </div>
 
     <div class="ignite-service-grid">
-        <a class="ignite-service-card tone-indigo" href="{% if user.is_authenticated %}{% url 'dashboard' %}#lhtc-scheduler{% else %}{% url 'account_login' %}{% endif %}">
+        <a class="ignite-service-card tone-indigo" href="{% if user.is_authenticated %}{% url 'scheduler' %}{% else %}{% url 'account_login' %}{% endif %}">
             <span class="ignite-service-icon"><i class="bi bi-calendar2-week"></i></span><h3>LHTC Scheduler</h3><p>Plan labs, classes and campus appointments.</p><span class="ignite-card-arrow"><i class="bi bi-arrow-up-right"></i></span>
         </a>
         <a class="ignite-service-card tone-rose" href="{% if user.is_authenticated %}{% url 'dashboard' %}#phc{% else %}{% url 'account_login' %}{% endif %}">

@@ -9,6 +9,8 @@ class CustomUser(AbstractUser):
         ADMIN = 'admin', 'Admin'
 
     role = models.CharField(max_length=10, choices=Role.choices, blank=True)
+    branch = models.CharField(max_length=50, blank=True)
+    academic_year = models.PositiveSmallIntegerField(null=True, blank=True)
 
     def __str__(self):
         return self.email or self.username

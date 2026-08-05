@@ -1,0 +1,121 @@
+[
+  {
+    "model": "scheduler.room",
+    "pk": 1,
+    "fields": {
+      "name": "A101",
+      "building": "Academic Block A",
+      "floor": "Ground",
+      "capacity": 40,
+      "has_projector": true,
+      "has_ac": false,
+      "has_wifi": true,
+      "has_audio_system": false,
+      "has_smart_board": false,
+      "is_active": true
+    }
+  },
+  {
+    "model": "scheduler.room",
+    "pk": 2,
+    "fields": {
+      "name": "A201",
+      "building": "Academic Block A",
+      "floor": "First",
+      "capacity": 90,
+      "has_projector": true,
+      "has_ac": true,
+      "has_wifi": true,
+      "has_audio_system": true,
+      "has_smart_board": false,
+      "is_active": true
+    }
+  },
+  {
+    "model": "scheduler.room",
+    "pk": 3,
+    "fields": {
+      "name": "Computer Lab 1",
+      "building": "Technology Block",
+      "floor": "First",
+      "capacity": 30,
+      "has_projector": true,
+      "has_ac": true,
+      "has_wifi": true,
+      "has_audio_system": false,
+      "has_smart_board": true,
+      "is_active": true
+    }
+  },
+  {
+    "model": "scheduler.room",
+    "pk": 4,
+    "fields": {
+      "name": "Central Auditorium",
+      "building": "Main Block",
+      "floor": "Ground",
+      "capacity": 250,
+      "has_projector": true,
+      "has_ac": true,
+      "has_wifi": true,
+      "has_audio_system": true,
+      "has_smart_board": true,
+      "is_active": true
+    }
+  },
+  {
+    "model": "scheduler.room",
+    "pk": 5,
+    "fields": {
+      "name": "B105 Maintenance",
+      "building": "Academic Block B",
+      "floor": "Ground",
+      "capacity": 60,
+      "has_projector": true,
+      "has_ac": false,
+      "has_wifi": true,
+      "has_audio_system": false,
+      "has_smart_board": false,
+      "is_active": false
+    }
+  },
+  {
+    "model": "scheduler.timetableentry",
+    "pk": 1,
+    "fields": {
+      "room": 1,
+      "day_of_week": 0,
+      "start_time": "10:00:00",
+      "end_time": "12:00:00",
+      "branch": "CSE",
+      "year": 2,
+      "subject": "Data Structures"
+    }
+  },
+  {
+    "model": "scheduler.timetableentry",
+    "pk": 2,
+    "fields": {
+      "room": 2,
+      "day_of_week": 0,
+      "start_time": "09:00:00",
+      "end_time": "11:00:00",
+      "branch": "ECE",
+      "year": 3,
+      "subject": "Signals and Systems"
+    }
+  },
+  {
+    "model": "scheduler.timetableentry",
+    "pk": 3,
+    "fields": {
+      "room": 3,
+      "day_of_week": 1,
+      "start_time": "14:00:00",
+      "end_time": "16:00:00",
+      "branch": "CSE",
+      "year": 1,
+      "subject": "Programming Lab"
+    }
+  }
+]
