@@ -17,6 +17,7 @@
                 <a class="{% if request.resolver_match.namespace == 'bus' and request.resolver_match.url_name == 'book_ticket' %}active{% endif %}" href="{% url 'bus:book_ticket' %}"><i class="bi bi-bus-front"></i> Bus Booking</a>
                 <a class="{% if request.resolver_match.namespace == 'bus' and request.resolver_match.url_name == 'previous_bookings' %}active{% endif %}" href="{% url 'bus:previous_bookings' %}"><i class="bi bi-journal-text"></i> Previous Bookings</a>
                 {% if user.is_staff %}<a class="{% if request.resolver_match.namespace == 'bus' and request.resolver_match.url_name == 'verify_ticket' %}active{% endif %}" href="{% url 'bus:verify_ticket' %}"><i class="bi bi-qr-code-scan"></i> Verify tickets</a>{% endif %}
+                <a class="{% if request.resolver_match.namespace == 'chatbot' %}active{% endif %}" href="{% url 'chatbot:index' %}"><i class="bi bi-robot"></i> RAG Bot</a>
             {% endif %}
         </nav>
 
@@ -51,7 +52,7 @@
             </a>
             <a href="{% url 'bus:dashboard' %}"><i class="bi bi-bus-front"></i><span>Bus</span></a>
             <a href="{% url 'dashboard' %}#canteen"><i class="bi bi-cup-hot"></i><span>Canteen</span></a>
-            <a href="{% url 'dashboard' %}#chatbot"><i class="bi bi-chat-square-dots"></i><span>Chatbot</span></a>
+            <a href="{% url 'chatbot:index' %}"><i class="bi bi-robot"></i><span>IIITDMJ RAG Bot</span></a>
             <a href="{% url 'lost_and_found:lost' %}"><i class="bi bi-search"></i><span>Lost &amp; Found</span></a>
         </nav>
         <div class="ignite-sidebar-bottom">
