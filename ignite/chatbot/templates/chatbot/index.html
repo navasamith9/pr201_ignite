@@ -1,0 +1,605 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IIITDMJ RAG Assistant - Ignite{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --bg-dark: #0b0f19;
+    --card-dark: #131b2e;
+    --card-border: rgba(255, 255, 255, 0.08);
+    --accent-blue: #3b82f6;
+    --accent-emerald: #10b981;
+    --accent-purple: #8b5cf6;
+    --text-primary: #f3f4f6;
+    --text-secondary: #9ca3af;
+  }
+
+  body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  .ignite-main {
+    padding: 0 !important;
+    background-color: var(--bg-dark);
+  }
+
+  .rag-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    height: calc(100vh - 70px);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 1rem 1rem 1rem;
+  }
+
+  .rag-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--card-border);
+    margin-bottom: 1rem;
+  }
+
+  .rag-header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .rag-icon-badge {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+
+  .rag-badge-status {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--accent-emerald);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .rag-badge-status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--accent-emerald);
+    box-shadow: 0 0 8px var(--accent-emerald);
+  }
+
+  .chat-box {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    scroll-behavior: smooth;
+  }
+
+  .chat-box::-webkit-scrollbar {
+    width: 6px;
+  }
+  .chat-box::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+  }
+
+  .chat-bubble {
+    display: flex;
+    gap: 1rem;
+    max-width: 90%;
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .chat-bubble.user {
+    margin-left: auto;
+    flex-direction: row-reverse;
+  }
+
+  .chat-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .chat-bubble.user .chat-avatar {
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: #fff;
+  }
+
+  .chat-bubble.bot .chat-avatar {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--card-border);
+    color: #60a5fa;
+  }
+
+  .chat-content {
+    background-color: var(--card-dark);
+    border: 1px solid var(--card-border);
+    padding: 1rem 1.25rem;
+    border-radius: 16px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    position: relative;
+  }
+
+  .chat-bubble.user .chat-content {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border-color: rgba(99, 102, 241, 0.3);
+    border-top-right-radius: 4px;
+  }
+
+  .chat-bubble.bot .chat-content {
+    border-top-left-radius: 4px;
+  }
+
+  .chat-content-body p {
+    margin: 0 0 0.5rem 0;
+  }
+
+  .chat-content-body p:last-child {
+    margin-bottom: 0;
+  }
+
+  .chat-content-body ul {
+    margin: 0 0 0.5rem 1.1rem;
+    padding: 0;
+  }
+
+  .chat-content-body ul:last-child {
+    margin-bottom: 0;
+  }
+
+  .chat-content-body li {
+    margin-bottom: 0.25rem;
+  }
+
+  .source-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.75rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: rgba(59, 130, 246, 0.12);
+    color: #93c5fd;
+    border: 1px solid rgba(59, 130, 246, 0.25);
+  }
+
+  .source-tag.out-of-context {
+    background: rgba(239, 68, 68, 0.12);
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.25);
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .copy-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Suggestions Section */
+  .suggestions-wrapper {
+    margin-top: auto;
+    padding-top: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .suggestions-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .suggestions-container {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .chip-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #e5e7eb;
+    padding: 0.5rem 0.9rem;
+    border-radius: 20px;
+    font-size: 0.83rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-align: left;
+  }
+
+  .chip-btn:hover {
+    background: rgba(59, 130, 246, 0.18);
+    border-color: rgba(59, 130, 246, 0.5);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+
+  /* Input Area (Codex style) */
+  .input-wrapper {
+    background: #131b2e;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    transition: border-color 0.2s;
+  }
+
+  .input-wrapper:focus-within {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+  }
+
+  .query-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 0.95rem;
+    padding: 0.5rem;
+    outline: none;
+    resize: none;
+    max-height: 120px;
+    font-family: inherit;
+  }
+
+  .query-input::placeholder {
+    color: #6b7280;
+  }
+
+  .action-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .send-btn {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+  }
+
+  .send-btn:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: scale(1.05);
+  }
+
+  .stop-btn {
+    background: #ef4444;
+    color: white;
+    display: none;
+  }
+
+  .stop-btn:hover {
+    background: #dc2626;
+  }
+
+  .typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .typing-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #9ca3af;
+    animation: blink 1.4s infinite fill-mode: both;
+  }
+  .typing-dot:nth-child(2) { animation-delay: .2s; }
+  .typing-dot:nth-child(3) { animation-delay: .4s; }
+
+  @keyframes blink {
+    0% { opacity: .2; }
+    20% { opacity: 1; }
+    100% { opacity: .2; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rag-container">
+  <!-- Header -->
+  <div class="rag-header">
+    <div class="rag-header-title">
+      <div class="rag-icon-badge">
+        <i class="bi bi-robot"></i>
+      </div>
+      <div>
+        <h4 class="mb-0 fw-bold text-white">IIITDMJ RAG Assistant</h4>
+        <small class="text-secondary">Official Website & Academic Guidelines (Annexure II UG - 2025)</small>
+      </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="rag-badge-status">Accuracy High • Ollama Active</span>
+      <button class="btn btn-sm btn-outline-secondary text-white" onclick="clearChat()" title="Clear Chat">
+        <i class="bi bi-trash3 me-1"></i> Clear
+      </button>
+    </div>
+  </div>
+
+  <!-- Chat History Area -->
+  <div class="chat-box" id="chatBox">
+    <!-- Welcome Bot Message -->
+    <div class="chat-bubble bot">
+      <div class="chat-avatar">
+        <i class="bi bi-cpu-fill"></i>
+      </div>
+      <div class="chat-content">
+        <button class="copy-btn" onclick="copyText(this)" title="Copy"><i class="bi bi-clipboard"></i></button>
+        <div>
+          Hello! I am your <strong>IIITDMJ RAG Bot</strong>. I can answer any questions regarding <strong>IIITDM Jabalpur official website</strong> and <strong>Annexure II Academic Guidelines (UG - Dec 2025)</strong> with high precision.
+        </div>
+        <div class="source-tag">
+          <i class="bi bi-shield-check"></i> Dual Source: iiitdmj.ac.in & Academic Guidelines PDF
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic Suggestions (Top 3 Questions) -->
+  <div class="suggestions-wrapper">
+    <div class="suggestions-label">
+      <i class="bi bi-lightbulb-fill text-warning"></i> Frequently Asked / Suggested Questions
+    </div>
+    <div class="suggestions-container" id="suggestionsContainer">
+      {% for sug in initial_suggestions %}
+      <button class="chip-btn" onclick="useSuggestion(this.innerText)">
+        <i class="bi bi-question-circle text-primary"></i> <span>{{ sug }}</span>
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Codex Style Input Container -->
+  <div class="input-wrapper">
+    <textarea 
+      id="queryInput" 
+      class="query-input" 
+      rows="1" 
+      placeholder="Type your IIITDMJ or Academic Guidelines question here..."
+      onkeydown="handleKeyDown(event)"
+    ></textarea>
+    
+    <button id="sendBtn" class="action-btn send-btn" onclick="sendQuery()" title="Send Question">
+      <i class="bi bi-arrow-up-circle-fill"></i>
+    </button>
+    
+    <button id="stopBtn" class="action-btn stop-btn" onclick="stopGeneration()" title="Stop Generation">
+      <i class="bi bi-stop-circle-fill"></i>
+    </button>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  let activeAbortController = null;
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendQuery();
+    }
+  }
+
+  function useSuggestion(text) {
+    const cleanText = text.replace(/^[^\w\s]+/, '').trim();
+    document.getElementById('queryInput').value = cleanText;
+    sendQuery();
+  }
+
+  function copyText(btn) {
+    const parent = btn.parentElement;
+    const textToCopy = parent.innerText.replace('Copy', '').trim();
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      btn.innerHTML = '<i class="bi bi-check2"></i>';
+      setTimeout(() => { btn.innerHTML = '<i class="bi bi-clipboard"></i>'; }, 2000);
+    });
+  }
+
+  function clearChat() {
+    const chatBox = document.getElementById('chatBox');
+    chatBox.innerHTML = `
+      <div class="chat-bubble bot">
+        <div class="chat-avatar"><i class="bi bi-cpu-fill"></i></div>
+        <div class="chat-content">
+          <div>Chat history cleared. How can I assist you with IIITDMJ academic guidelines?</div>
+          <div class="source-tag"><i class="bi bi-shield-check"></i> IIITDMJ RAG System Ready</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function updateSuggestions(suggestions) {
+    if (!suggestions || suggestions.length === 0) return;
+    const container = document.getElementById('suggestionsContainer');
+    container.innerHTML = suggestions.map(sug => `
+      <button class="chip-btn" onclick="useSuggestion(this.innerText)">
+        <i class="bi bi-question-circle text-primary"></i> <span>${escapeHtml(sug)}</span>
+      </button>
+    `).join('');
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function formatAnswer(text) {
+    const escaped = escapeHtml(text);
+    const paragraphs = escaped.split(/\n\s*\n/);
+
+    const htmlParts = paragraphs.map(para => {
+      const lines = para.split('\n').map(l => l.trim()).filter(l => l.length);
+      const isList = lines.length && lines.every(l => /^[•\-]\s+/.test(l));
+
+      if (isList) {
+        const items = lines.map(l => `<li>${l.replace(/^[•\-]\s+/, '')}</li>`).join('');
+        return `<ul>${items}</ul>`;
+      }
+      return `<p>${lines.join('<br>')}</p>`;
+    });
+
+    let html = htmlParts.join('');
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    return html;
+  }
+
+  async function sendQuery() {
+    const input = document.getElementById('queryInput');
+    const query = input.value.trim();
+    if (!query) return;
+
+    // Append User Message
+    const chatBox = document.getElementById('chatBox');
+    const userBubble = document.createElement('div');
+    userBubble.className = 'chat-bubble user';
+    userBubble.innerHTML = `
+      <div class="chat-avatar">U</div>
+      <div class="chat-content">${escapeHtml(query)}</div>
+    `;
+    chatBox.appendChild(userBubble);
+    input.value = '';
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // Create Bot Thinking Bubble
+    const botBubble = document.createElement('div');
+    botBubble.className = 'chat-bubble bot';
+    const botBubbleId = 'bot-msg-' + Date.now();
+    botBubble.innerHTML = `
+      <div class="chat-avatar"><i class="bi bi-cpu-fill"></i></div>
+      <div class="chat-content" id="${botBubbleId}">
+        <div class="typing-indicator">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      </div>
+    `;
+    chatBox.appendChild(botBubble);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // Toggle Send -> Stop Button
+    document.getElementById('sendBtn').style.display = 'none';
+    document.getElementById('stopBtn').style.display = 'flex';
+
+    activeAbortController = new AbortController();
+
+    try {
+      const response = await fetch('/chatbot/api/query/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: query }),
+        signal: activeAbortController.signal
+      });
+
+      const data = await response.json();
+      const botContentEl = document.getElementById(botBubbleId);
+
+      if (data.answer) {
+        const isOutOfCtx = !data.in_context;
+        const sourceBadgeClass = isOutOfCtx ? 'source-tag out-of-context' : 'source-tag';
+        const sourceIcon = isOutOfCtx ? 'bi-exclamation-triangle-fill' : 'bi-journal-check';
+
+        botContentEl.innerHTML = `
+          <button class="copy-btn" onclick="copyText(this)" title="Copy"><i class="bi bi-clipboard"></i></button>
+          <div class="chat-content-body">${formatAnswer(data.answer)}</div>
+          <div class="${sourceBadgeClass}">
+            <i class="bi ${sourceIcon}"></i> Source: ${escapeHtml(data.source)}
+          </div>
+        `;
+      } else {
+        botContentEl.innerHTML = `<div class="text-danger">An error occurred while fetching the answer.</div>`;
+      }
+
+      if (data.suggestions) {
+        updateSuggestions(data.suggestions);
+      }
+
+    } catch (err) {
+      const botContentEl = document.getElementById(botBubbleId);
+      if (err.name === 'AbortError') {
+        botContentEl.innerHTML = `<div class="text-warning"><i class="bi bi-stop-circle me-1"></i> Generation stopped by user.</div>`;
+      } else {
+        botContentEl.innerHTML = `<div class="text-danger">Failed to connect to RAG server.</div>`;
+      }
+    } finally {
+      document.getElementById('sendBtn').style.display = 'flex';
+      document.getElementById('stopBtn').style.display = 'none';
+      activeAbortController = null;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  }
+
+  function stopGeneration() {
+    if (activeAbortController) {
+      activeAbortController.abort();
+    }
+  }
+</script>
+{% endblock %}

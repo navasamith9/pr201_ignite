@@ -31,9 +31,8 @@ urlpatterns = [
     path('phc/', include('phc.urls')),
     path('payments/', include('payments.urls')),
     path('lost-and-found/', include('lost_and_found.urls')),
-
+    path('chatbot/', include('chatbot.urls')),
     path('api/scheduler/', include('scheduler.urls')),
-
 ]
 
 if settings.DEBUG:
