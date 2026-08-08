@@ -17,6 +17,7 @@ from django.utils import timezone
 
 from payments.models import Payment
 
+from .forms import BusScheduleForm
 from .models import BusSchedule, TicketBooking
 
 
@@ -36,9 +37,36 @@ def _account_ticket_total(user, travel_date):
     ).aggregate(total=Sum('quantity'))['total'] or 0
 
 
+def is_bus_admin(user):
+    """Allow global administrators and Bus-only administrators."""
+    return bool(
+        user.is_authenticated
+        and (
+            user.is_superuser
+            or user.is_staff
+            or getattr(user, 'role', None) == 'admin'
+            or user.is_bus_admin
+        )
+    )
+
+
 @login_required
 def dashboard(request):
-    return render(request, 'bus/dashboard.html')
+    return render(request, 'bus/dashboard.html', {'is_bus_admin': is_bus_admin(request.user)})
+
+
+@user_passes_test(is_bus_admin)
+def add_bus(request):
+    if request.method == 'POST':
+        form = BusScheduleForm(request.POST)
+        if form.is_valid():
+            bus = form.save()
+            messages.success(request, f'{bus.name} was added to the bus schedule.')
+            return redirect('bus:dashboard')
+    else:
+        form = BusScheduleForm()
+
+    return render(request, 'bus/add_bus.html', {'form': form})
 
 
 @login_required
@@ -159,7 +187,7 @@ def previous_bookings(request):
 
 def _get_ticket_for_view(request, ticket_id):
     booking = get_object_or_404(TicketBooking.objects.select_related('bus', 'user'), ticket_id=ticket_id)
-    if booking.user_id != request.user.id and not request.user.is_staff:
+    if booking.user_id != request.user.id and not is_bus_admin(request.user):
         raise Http404()
     return booking
 
@@ -214,7 +242,7 @@ def download_ticket(request, ticket_id):
     return response
 
 
-@user_passes_test(lambda user: user.is_staff)
+@user_passes_test(is_bus_admin)
 def verify_ticket(request):
     result = None
     verification_error = None

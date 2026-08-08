@@ -2,9 +2,11 @@
 {% block title %}PHC Admin | Ignite{% endblock %}
 {% block extra_head %}<style>
 .phc-admin-hero { background: linear-gradient(120deg, #fff5f5, #f5f9ff); border: 1px solid #e7edf5; }
-.phc-management-card { color: #1f2b3d; transition: transform .16s ease, box-shadow .16s ease; }
-.phc-management-card:hover { color: #1f2b3d; transform: translateY(-3px); box-shadow: 0 .65rem 1.4rem rgba(31, 43, 61, .12) !important; }
-.phc-management-card strong { margin-top: .85rem; font-size: 1rem; }.phc-management-card small { color: #6c7789; line-height: 1.45; margin-top: .28rem; }.phc-management-icon { display: grid; place-items: center; width: 2.65rem; height: 2.65rem; border-radius: .75rem; font-size: 1.3rem; }
+.phc-management-grid { margin-top: 1.4rem; }
+.phc-management-card { display: grid; grid-template-columns: 46px minmax(0, 1fr) 24px; grid-template-rows: auto auto; grid-template-areas: "icon title arrow" "icon description arrow"; align-items: center; column-gap: 1rem; min-height: 152px; padding: 1.5rem !important; border: 1px solid #e2e8f0 !important; border-radius: 15px !important; color: #1f2b3d; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.phc-management-card:hover { border-color: #c7d2fe !important; color: #1f2b3d; transform: translateY(-3px); box-shadow: 0 .75rem 1.5rem rgba(31, 43, 61, .09) !important; }
+.phc-management-card strong { grid-area: title; margin: 0 0 .28rem; font-size: 1rem; font-weight: 800; }.phc-management-card small { grid-area: description; margin: 0; color: #6c7789; font-size: .8rem; line-height: 1.45; }.phc-management-icon { display: grid; grid-area: icon; place-items: center; width: 46px; height: 46px; border-radius: 12px; font-size: 1.26rem; }.phc-management-card > i { grid-area: arrow; align-self: center; color: #a4adc0; font-size: 1.5rem; }
+@media (min-width: 1200px) { .phc-management-grid > .col-xl-4 { flex: 0 0 auto; width: 50%; } }
 </style>{% endblock %}
 {% block content %}
 <div class="container py-4 pb-5">
@@ -26,7 +28,7 @@
 
     <section class="mb-5" aria-labelledby="manage-title">
         <div class="mb-3"><h2 id="manage-title" class="h3 mb-1">Manage PHC</h2><p class="text-muted mb-0">Choose a task to update the information shown to students and doctors.</p></div>
-        <div class="row g-3">
+        <div class="row g-4 phc-management-grid">
             <div class="col-md-6 col-xl-4"><a class="phc-management-card card card-body h-100 border-0 shadow-sm text-decoration-none" href="{% url 'phc:admin_doctors' %}"><span class="phc-management-icon bg-primary-subtle text-primary"><i class="bi bi-person-plus"></i></span><strong>Add & manage doctors</strong><small>Names, institute emails, specialization and rooms.</small><i class="bi bi-arrow-right ms-auto"></i></a></div>
             <div class="col-md-6 col-xl-4"><a class="phc-management-card card card-body h-100 border-0 shadow-sm text-decoration-none" href="{% url 'phc:admin_schedules' %}"><span class="phc-management-icon bg-success-subtle text-success"><i class="bi bi-calendar-week"></i></span><strong>Consultation schedules</strong><small>Set each doctor’s regular PHC timings.</small><i class="bi bi-arrow-right ms-auto"></i></a></div>
             <div class="col-md-6 col-xl-4"><a class="phc-management-card card card-body h-100 border-0 shadow-sm text-decoration-none" href="{% url 'phc:admin_announcements' %}"><span class="phc-management-icon bg-warning-subtle text-warning"><i class="bi bi-megaphone"></i></span><strong>Announcements</strong><small>Visible immediately to students and doctors.</small><i class="bi bi-arrow-right ms-auto"></i></a></div>

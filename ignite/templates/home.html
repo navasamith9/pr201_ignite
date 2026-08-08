@@ -18,6 +18,73 @@
         <div class="ignite-hero-orbit" aria-hidden="true"><span></span><span></span><i class="bi bi-lightning-charge-fill"></i></div>
     </div>
 
+    {% if can_manage_admins %}
+    <section class="ignite-admin-access" aria-labelledby="admin-access-heading">
+        <div>
+            <span class="ignite-eyebrow"><i class="bi bi-shield-lock"></i> Administrator only</span>
+            <h2 id="admin-access-heading">Grant administrator access</h2>
+            <p>Give an existing institute account access to all Ignite administration tools.</p>
+        </div>
+        <form method="post" class="ignite-admin-access-form">
+            {% csrf_token %}
+            <input type="hidden" name="access_scope" value="global">
+            <label for="admin-email">Institute email</label>
+            <input id="admin-email" name="admin_email" type="email" class="form-control" placeholder="name@iiitdmj.ac.in" required>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-person-check"></i> Grant admin access</button>
+        </form>
+    </section>
+
+    <section class="ignite-admin-access ignite-service-admin-access" aria-labelledby="service-admin-access-heading">
+        <div>
+            <span class="ignite-eyebrow"><i class="bi bi-shield-plus"></i> Administrator only</span>
+            <h2 id="service-admin-access-heading">Grant service administrator access</h2>
+            <p>Give an account admin access to one service while keeping all other permissions unchanged.</p>
+        </div>
+        <form method="post" class="ignite-admin-access-form ignite-service-admin-access-form">
+            {% csrf_token %}
+            <input type="hidden" name="access_scope" value="service">
+            <label for="service-admin-email">Institute email</label>
+            <input id="service-admin-email" name="admin_email" type="email" class="form-control" placeholder="name@iiitdmj.ac.in" required>
+            <label for="service-admin-role">Service admin role</label>
+            <select id="service-admin-role" name="service_admin_role" class="form-select" required>
+                <option value="lhtc">LHTC admin</option>
+                <option value="phc">PHC admin</option>
+                <option value="bus">Bus admin</option>
+                <option value="canteen">Canteen admin</option>
+            </select>
+            <button type="submit" class="btn btn-outline-primary"><i class="bi bi-person-gear"></i> Grant service access</button>
+        </form>
+    </section>
+
+    <section class="ignite-admin-access ignite-access-review" aria-labelledby="access-review-heading">
+        <div class="ignite-access-review-heading">
+            <span class="ignite-eyebrow"><i class="bi bi-person-dash"></i> Administrator only</span>
+            <h2 id="access-review-heading">Granted access</h2>
+            <p>Revoke global or service-specific administrator access when it is no longer needed.</p>
+        </div>
+        <div class="ignite-access-review-groups">
+            <section class="ignite-access-review-group">
+                <h3>Global administrators</h3>
+                <div class="ignite-access-review-list">
+                    {% for account in global_admins %}
+                    <article class="ignite-access-review-item"><span><strong>{{ account.get_full_name|default:account.username }}</strong><small>{{ account.email|default:account.username }}</small></span>{% if account.is_superuser %}<small class="ignite-access-protected">Superuser</small>{% elif account.id == user.id %}<small class="ignite-access-protected">Your account</small>{% else %}<form method="post">{% csrf_token %}<input type="hidden" name="access_scope" value="revoke"><input type="hidden" name="service_admin_role" value="global"><input type="hidden" name="access_target_id" value="{{ account.id }}"><button type="submit" class="btn btn-outline-danger btn-sm">Revoke</button></form>{% endif %}</article>
+                    {% empty %}<p class="ignite-access-empty">No global administrators.</p>{% endfor %}
+                </div>
+            </section>
+            {% for group in service_admin_groups %}
+            <section class="ignite-access-review-group">
+                <h3>{{ group.name }}s</h3>
+                <div class="ignite-access-review-list">
+                    {% for account in group.accounts %}
+                    <article class="ignite-access-review-item"><span><strong>{{ account.get_full_name|default:account.username }}</strong><small>{{ account.email|default:account.username }}</small></span>{% if account.is_superuser %}<small class="ignite-access-protected">Superuser</small>{% else %}<form method="post">{% csrf_token %}<input type="hidden" name="access_scope" value="revoke"><input type="hidden" name="service_admin_role" value="{{ group.key }}"><input type="hidden" name="access_target_id" value="{{ account.id }}"><button type="submit" class="btn btn-outline-danger btn-sm">Revoke</button></form>{% endif %}</article>
+                    {% empty %}<p class="ignite-access-empty">No {{ group.name|lower }}s assigned.</p>{% endfor %}
+                </div>
+            </section>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
     <div class="ignite-section-heading" id="services">
         <div>
             <span class="ignite-eyebrow"><i class="bi bi-grid-1x2"></i> One portal</span>

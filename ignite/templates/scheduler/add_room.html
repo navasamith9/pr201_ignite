@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add Rooms | Ignite{% endblock %}
+
+{% block content %}
+<section class="scheduler-page" data-scheduler-page="rooms">
+    <header class="scheduler-header"><div><span class="ignite-eyebrow"><i class="bi bi-shield-check"></i> Administrator</span><h1>Add rooms</h1><p>Add lecture halls and define the facilities available for bookings.</p></div><a href="{% url 'scheduler' %}" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> Scheduler</a></header>
+    <div id="scheduler-message" class="alert d-none" role="status"></div>
+    <div class="scheduler-management-grid">
+        <section class="scheduler-management-card"><div class="scheduler-section-heading"><div><span class="ignite-eyebrow">New room</span><h2>Room details</h2></div></div><form id="room-form">{% csrf_token %}<div class="scheduler-form-grid"><div class="scheduler-field"><label for="room-name">Room name</label><input id="room-name" class="form-control" maxlength="100" placeholder="e.g. A301" required></div><div class="scheduler-field"><label for="room-capacity">Capacity</label><input id="room-capacity" class="form-control" type="number" min="1" required></div><div class="scheduler-field"><label for="room-building">Building</label><input id="room-building" class="form-control" maxlength="100" placeholder="Optional"></div><div class="scheduler-field"><label for="room-floor">Floor</label><input id="room-floor" class="form-control" maxlength="30" placeholder="Optional"></div></div><fieldset class="scheduler-facilities"><legend>Facilities</legend><div class="scheduler-checks"><label><input id="room-projector" type="checkbox"> Projector</label><label><input id="room-ac" type="checkbox"> AC</label><label><input id="room-wifi" type="checkbox"> Wi-Fi</label><label><input id="room-audio" type="checkbox"> Audio system</label><label><input id="room-smart-board" type="checkbox"> Smart board</label><label><input id="room-active" type="checkbox" checked> Available for booking</label></div></fieldset><button class="btn btn-primary" type="submit"><i class="bi bi-plus-circle"></i> Add room</button></form></section>
+        <section class="scheduler-management-card"><div class="scheduler-section-heading"><div><span class="ignite-eyebrow">Existing rooms</span><h2>Available spaces</h2></div></div><p id="rooms-empty" class="scheduler-empty">Loading rooms.</p><div id="room-list" class="scheduler-item-list"></div></section>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'js/scheduler-pages.js' %}"></script>{% endblock %}

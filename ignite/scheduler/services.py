@@ -5,11 +5,26 @@ from .models import Room, Event, TimetableEntry
 
 
 def user_matches_event_audience(user, event):
-    """Return whether a student belongs to an event's target audience."""
-    if event.branches and user.branch not in event.branches:
+    """Return whether a student belongs to an event's target audience.
+
+    Older and Google-created student accounts can exist before their branch or
+    academic year has been recorded.  Do not make those students disappear
+    from every targeted event: they can still see and register for it until
+    their profile is completed.  When the profile information is available,
+    apply the event's branch/year restrictions as usual.
+    """
+    student_branch = (user.branch or "").strip().casefold()
+    event_branches = {
+        branch.strip().casefold()
+        for branch in event.branches
+        if isinstance(branch, str) and branch.strip()
+    }
+    if event_branches and student_branch and student_branch not in event_branches:
         return False
-    if event.years and user.academic_year not in event.years:
+
+    if event.years and user.academic_year is not None and user.academic_year not in event.years:
         return False
+
     return True
 
 

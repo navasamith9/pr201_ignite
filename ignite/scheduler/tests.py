@@ -134,6 +134,58 @@ class SchedulerTests(TestCase):
 
         self.assertEqual(response.status_code, 403)
 
+    def test_booked_event_is_visible_and_registerable_for_its_student_audience(self):
+        event = self.create_event(
+            status="BOOKED",
+            booked_room=self.large_room,
+            branches=["CSE"],
+            years=[2],
+        )
+        self.client.force_login(self.student)
+
+        campus_response = self.client.get(reverse("campus-events"))
+
+        self.assertEqual(campus_response.status_code, 200)
+        self.assertEqual([item["id"] for item in campus_response.json()], [event.id])
+        self.assertTrue(campus_response.json()[0]["registration_open"])
+
+        registration_response = self.client.post(
+            reverse("register-event", args=[event.id]),
+            data={},
+            content_type="application/json",
+        )
+
+        self.assertEqual(registration_response.status_code, 201)
+        registered_response = self.client.get(f"{reverse('list-events')}?view=student")
+        self.assertEqual([item["id"] for item in registered_response.json()], [event.id])
+
+    def test_student_with_incomplete_profile_can_see_and_register_for_booked_event(self):
+        """Unprofiled accounts must not be hidden from all targeted events."""
+        event = self.create_event(
+            status="BOOKED",
+            booked_room=self.large_room,
+            branches=["cse"],
+            years=[3],
+        )
+        self.student.branch = ""
+        self.student.academic_year = None
+        self.student.save(update_fields=["branch", "academic_year"])
+        self.client.force_login(self.student)
+
+        campus_response = self.client.get(f"{reverse('campus-events')}?view=student")
+
+        self.assertEqual(campus_response.status_code, 200)
+        self.assertEqual([item["id"] for item in campus_response.json()], [event.id])
+        self.assertTrue(campus_response.json()[0]["registration_open"])
+        self.assertEqual(
+            self.client.post(
+                reverse("register-event", args=[event.id]),
+                data={},
+                content_type="application/json",
+            ).status_code,
+            201,
+        )
+
     def test_admin_can_grant_and_revoke_student_coordinator_access(self):
         admin = get_user_model().objects.create_user(
             username="scheduler-admin",
@@ -201,3 +253,48 @@ class SchedulerTests(TestCase):
         response = self.client.get(reverse("coordinator-permissions"))
 
         self.assertEqual(response.status_code, 403)
+
+
+class SchedulerFrontendTests(TestCase):
+    def setUp(self):
+        self.admin = get_user_model().objects.create_user(
+            username="scheduler-page-admin",
+            email="page-admin@example.com",
+            password="test-password-123",
+            role="admin",
+        )
+        self.student = get_user_model().objects.create_user(
+            username="scheduler-page-student",
+            password="test-password-123",
+            role="student",
+        )
+
+    def test_administrator_sees_management_cards_and_pages(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse("scheduler"))
+        self.assertContains(response, 'data-scheduler-calendar')
+        self.assertContains(response, 'data-calendar-scope="campus"')
+        self.assertContains(response, 'id="scheduler-dashboard-notifications"')
+        for url_name in (
+            "scheduler-add-room",
+            "scheduler-timetable-entries",
+            "scheduler-grant-access",
+        ):
+            self.assertContains(response, reverse(url_name))
+            self.assertEqual(self.client.get(reverse(url_name)).status_code, 200)
+
+    def test_student_cannot_open_scheduler_management_pages(self):
+        self.client.force_login(self.student)
+
+        response = self.client.get(reverse("scheduler"))
+        self.assertContains(response, 'data-scheduler-calendar')
+        self.assertContains(response, 'data-calendar-scope="campus"')
+        self.assertContains(response, 'data-student-account="true"')
+        self.assertNotContains(response, reverse("scheduler-add-room"))
+        for url_name in (
+            "scheduler-add-room",
+            "scheduler-timetable-entries",
+            "scheduler-grant-access",
+        ):
+            self.assertEqual(self.client.get(reverse(url_name)).status_code, 403)

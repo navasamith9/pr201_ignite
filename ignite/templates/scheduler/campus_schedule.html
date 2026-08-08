@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Campus Schedule | Ignite{% endblock %}
+
+{% block content %}
+<section class="scheduler-page" data-scheduler-page="campus" data-role="{{ scheduler_role }}" data-student-account="{{ scheduler_is_student|yesno:'true,false' }}" data-can-book="{{ scheduler_can_book|yesno:'true,false' }}">
+    <header class="scheduler-header">
+        <div><span class="ignite-eyebrow"><i class="bi bi-calendar3"></i> LHTC Scheduler</span><h1>Campus schedule</h1><p>Browse upcoming events and register before their deadlines.</p></div>
+        <a href="{% url 'scheduler' %}" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> Scheduler</a>
+    </header>
+    <div id="scheduler-message" class="alert d-none" role="status"></div>
+    <div class="d-none">{% csrf_token %}</div>
+    <section class="scheduler-overview"><div class="scheduler-list-panel"><div class="scheduler-section-heading"><div><span class="ignite-eyebrow">Campus schedule</span><h2 id="campus-heading">{% if scheduler_is_student %}New events{% else %}All events{% endif %}</h2></div></div><p id="campus-empty" class="scheduler-empty">Loading upcoming events.</p><div id="campus-events" class="scheduler-item-list"></div></div></section>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'js/scheduler-pages.js' %}"></script>{% endblock %}

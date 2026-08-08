@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Bus | Ignite{% endblock %}
+
+{% block content %}
+<section class="ignite-bus-page container-fluid">
+    <div class="ignite-page-heading">
+        <div>
+            <span class="ignite-eyebrow"><i class="bi bi-shield-check"></i> Administrator</span>
+            <h1>Add a bus</h1>
+            <p>Create a schedule that students can use to find and book a bus.</p>
+        </div>
+        <a href="{% url 'bus:dashboard' %}" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> Bus dashboard</a>
+    </div>
+
+    <section class="card border-0 ignite-bus-filter-card" style="max-width: 760px;">
+        <div class="card-body p-4">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                        {{ form.name }}
+                        {% for error in form.name.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.route.id_for_label }}">{{ form.route.label }}</label>
+                        {{ form.route }}
+                        {% for error in form.route.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="{{ form.day.id_for_label }}">{{ form.day.label }}</label>
+                        {{ form.day }}
+                        {% for error in form.day.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="{{ form.departure_time.id_for_label }}">{{ form.departure_time.label }}</label>
+                        {{ form.departure_time }}
+                        {% for error in form.departure_time.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="{{ form.price.id_for_label }}">{{ form.price.label }} (₹)</label>
+                        {{ form.price }}
+                        {% for error in form.price.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.max_capacity.id_for_label }}">{{ form.max_capacity.label }}</label>
+                        {{ form.max_capacity }}
+                        <div class="form-text">Maximum 40 seats per bus.</div>
+                        {% for error in form.max_capacity.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="form-check mb-2">
+                            {{ form.active }}
+                            <label class="form-check-label" for="{{ form.active.id_for_label }}">{{ form.active.label }}</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 mt-4">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-plus-circle"></i> Add bus</button>
+                    <a href="{% url 'bus:dashboard' %}" class="btn btn-light">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </section>
+</section>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Timetable Entries | Ignite{% endblock %}
+
+{% block content %}
+<section class="scheduler-page" data-scheduler-page="timetable">
+    <header class="scheduler-header"><div><span class="ignite-eyebrow"><i class="bi bi-shield-check"></i> Administrator</span><h1>Timetable entries</h1><p>Add regular classes and exams so those rooms are excluded from event bookings.</p></div><a href="{% url 'scheduler' %}" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> Scheduler</a></header>
+    <div id="scheduler-message" class="alert d-none" role="status"></div>
+    <div class="scheduler-management-grid">
+        <section class="scheduler-management-card"><div class="scheduler-section-heading"><div><span class="ignite-eyebrow">New entry</span><h2>Class or exam</h2></div></div><form id="timetable-form">{% csrf_token %}<div class="scheduler-form-grid"><div class="scheduler-field scheduler-field--wide"><label for="timetable-room">Room</label><select id="timetable-room" class="form-select" required><option value="">Loading rooms…</option></select></div><div class="scheduler-field"><label for="timetable-day">Day</label><select id="timetable-day" class="form-select"><option value="0">Monday</option><option value="1">Tuesday</option><option value="2">Wednesday</option><option value="3">Thursday</option><option value="4">Friday</option><option value="5">Saturday</option><option value="6">Sunday</option></select></div><div class="scheduler-field"><label for="timetable-subject">Subject</label><input id="timetable-subject" class="form-control" maxlength="150" placeholder="Optional"></div><div class="scheduler-field"><label for="timetable-start">Start time</label><input id="timetable-start" class="form-control" type="time" required></div><div class="scheduler-field"><label for="timetable-end">End time</label><input id="timetable-end" class="form-control" type="time" required></div><div class="scheduler-field"><label for="timetable-branch">Branch</label><input id="timetable-branch" class="form-control" maxlength="50" placeholder="e.g. CSE" required></div><div class="scheduler-field"><label for="timetable-year">Year</label><input id="timetable-year" class="form-control" type="number" min="1" required></div></div><button class="btn btn-primary mt-4" type="submit"><i class="bi bi-plus-circle"></i> Add timetable entry</button></form></section>
+        <section class="scheduler-management-card"><div class="scheduler-section-heading"><div><span class="ignite-eyebrow">Existing entries</span><h2>Regular timetable</h2></div></div><p id="timetable-empty" class="scheduler-empty">Loading timetable entries.</p><div id="timetable-list" class="scheduler-item-list"></div></section>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'js/scheduler-pages.js' %}"></script>{% endblock %}
