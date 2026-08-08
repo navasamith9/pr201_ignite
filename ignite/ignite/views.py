@@ -182,7 +182,7 @@ def dashboard(request):
             'unread': False,
         },
     ]
-    return render(request, 'dashboard.html', {'recent_notifications': recent_notifications})
+    return render(request, 'dashboard.html')
 
 
 def _scheduler_context(request):

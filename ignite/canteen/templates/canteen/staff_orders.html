@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Canteen Orders | Ignite{% endblock %}
+{% block content %}
+<section class="container py-4 py-md-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div><span class="ignite-eyebrow"><i class="bi bi-shop"></i> Canteen staff</span><h1 class="mt-2 mb-1">Order queue</h1><p class="text-muted mb-0">Update orders as they move through the kitchen.</p></div>
+        <a class="btn btn-outline-primary" href="{% url 'canteen:menu' %}"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+    <div class="card border-0 shadow-sm"><div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th class="ps-3">Token</th><th>Student</th><th>Items</th><th>Total</th><th>Status</th><th class="pe-3">Update</th></tr></thead><tbody>{% for order in orders %}<tr><td class="ps-3"><strong>{{ order.token_label }}</strong><div><small class="text-muted">{{ order.created_at|date:"d M, g:i A" }}</small></div></td><td>{{ order.student.get_full_name|default:order.student.username }}</td><td>{% for item in order.items.all %}{{ item.quantity }}× {{ item.item_name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td><td>₹{{ order.total_amount }}</td><td><span class="badge {% if order.status == 'completed' %}text-bg-success{% elif order.status == 'ready' %}text-bg-primary{% else %}text-bg-warning{% endif %}">{{ order.get_status_display }}</span></td><td class="pe-3"><form method="post" action="{% url 'canteen:update_order_status' order.id %}" class="d-flex gap-2">{% csrf_token %}<select class="form-select form-select-sm" name="status" aria-label="Status for {{ order.token_label }}">{% for value, label in status_choices %}<option value="{{ value }}" {% if value == order.status %}selected{% endif %}>{{ label }}</option>{% endfor %}</select><button class="btn btn-sm btn-outline-primary">Save</button></form></td></tr>{% empty %}<tr><td colspan="6" class="text-center text-muted py-5">No canteen orders yet.</td></tr>{% endfor %}</tbody></table></div></div>
+</section>
+{% endblock %}

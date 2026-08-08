@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Canteen | Ignite{% endblock %}
+{% block content %}
+<section class="container py-4 py-md-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <span class="ignite-eyebrow"><i class="bi bi-cup-hot"></i> Campus canteen</span>
+            <h1 class="mt-2 mb-1">Canteen</h1>
+            <p class="text-muted mb-0">Order food, collect it with your token, and keep track of each order.</p>
+        </div>
+        <a class="btn btn-outline-primary" href="{% url 'dashboard' %}"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+
+    <section class="mb-5" aria-labelledby="student-actions-title">
+        <div class="mb-3"><h2 id="student-actions-title" class="h4 mb-1">Student services</h2><p class="text-muted mb-0">Review your cart or check the status of an earlier order.</p></div>
+        <div class="row g-4">
+            <div class="col-md-6"><a href="{% url 'canteen:cart' %}" class="ignite-bus-action-card"><span class="tone-orange"><i class="bi bi-cart3"></i></span><div><h2>My cart{% if cart_count %} ({{ cart_count }}){% endif %}</h2><p>Change quantities, see your total, and place your order.</p></div><i class="bi bi-arrow-right-short"></i></a></div>
+            <div class="col-md-6"><a href="{% url 'canteen:my_orders' %}" class="ignite-bus-action-card"><span class="tone-indigo"><i class="bi bi-receipt"></i></span><div><h2>My orders</h2><p>See your token number and the latest order status.</p></div><i class="bi bi-arrow-right-short"></i></a></div>
+        </div>
+    </section>
+
+    {% if is_canteen_admin %}
+        <section class="mb-5" aria-labelledby="management-title">
+            <div class="mb-3"><h2 id="management-title" class="h4 mb-1">Canteen management</h2><p class="text-muted mb-0">Manage menu items and keep student orders moving.</p></div>
+            <div class="row g-4">
+                <div class="col-md-6"><a href="{% url 'canteen:staff_menu' %}" class="ignite-bus-action-card ignite-bus-action-card--admin"><span class="tone-orange"><i class="bi bi-journal-plus"></i></span><div><h2>Manage menu</h2><p>Add, edit, remove, or mark food items available and unavailable.</p></div><i class="bi bi-arrow-right-short"></i></a></div>
+                <div class="col-md-6"><a href="{% url 'canteen:staff_orders' %}" class="ignite-bus-action-card ignite-bus-action-card--admin"><span class="tone-green"><i class="bi bi-clipboard-check"></i></span><div><h2>View orders</h2><p>Check token orders and update their preparation status.</p></div><i class="bi bi-arrow-right-short"></i></a></div>
+            </div>
+        </section>
+    {% endif %}
+
+    <section aria-labelledby="student-menu-title">
+        <div class="mb-3"><h2 id="student-menu-title" class="h4 mb-1">Student menu</h2><p class="text-muted mb-0">Available items can be added directly to your cart.</p></div>
+        <div class="row g-3">
+            {% for item in items %}
+                <div class="col-sm-6 col-lg-4"><article class="card border-0 shadow-sm h-100"><div class="card-body d-flex flex-column"><div class="d-flex justify-content-between gap-2"><span class="badge text-bg-light">{{ item.category }}</span><span class="badge {% if item.is_available %}text-bg-success{% else %}text-bg-secondary{% endif %}">{% if item.is_available %}Available{% else %}Unavailable{% endif %}</span></div><h3 class="h5 mt-3 mb-1">{{ item.name }}</h3><p class="fs-5 fw-bold text-primary mb-3">₹{{ item.price }}</p><form method="post" action="{% url 'canteen:add_to_cart' item.id %}" class="mt-auto">{% csrf_token %}<button class="btn btn-primary w-100" {% if not item.is_available %}disabled{% endif %}><i class="bi bi-plus-lg"></i> Add to cart</button></form></div></article></div>
+            {% empty %}
+                <div class="col-12"><div class="card border-0 shadow-sm"><div class="card-body text-center py-5 text-muted"><i class="bi bi-cup-straw fs-2"></i><p class="mb-0 mt-2">The menu has not been published yet.</p></div></div></div>
+            {% endfor %}
+        </div>
+    </section>
+</section>
+{% endblock %}
