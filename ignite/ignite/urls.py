@@ -34,6 +34,7 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('accounts/', include('accounts.urls')),
     path('bus/', include('bus.urls')),
+    path('canteen/', include('canteen.urls')),
     path('phc/', include('phc.urls')),
     path('payments/', include('payments.urls')),
     path('lost-and-found/', include('lost_and_found.urls')),
