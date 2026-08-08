@@ -16,7 +16,12 @@ def is_scheduler_admin(user):
     return bool(
         user
         and user.is_authenticated
-        and (user.is_superuser or user.is_staff or user.role == user.Role.ADMIN)
+        and (
+            user.is_superuser
+            or user.is_staff
+            or user.role == user.Role.ADMIN
+            or user.is_lhtc_admin
+        )
     )
 
 

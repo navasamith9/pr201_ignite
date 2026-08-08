@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Grant Room Booking Access | Ignite{% endblock %}
+
+{% block content %}
+<section class="scheduler-page" data-scheduler-page="access">
+    <header class="scheduler-header"><div><span class="ignite-eyebrow"><i class="bi bi-shield-check"></i> Administrator</span><h1>Grant room booking access</h1><p>Enter a student's institute email to make them a room-booking coordinator.</p></div><a href="{% url 'scheduler' %}" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> Scheduler</a></header>
+    <div id="scheduler-message" class="alert d-none" role="status"></div>
+    <div class="scheduler-management-grid">
+        <section class="scheduler-management-card"><div class="scheduler-section-heading"><div><span class="ignite-eyebrow">Student access</span><h2>Grant permission</h2></div></div><form id="coordinator-form" class="scheduler-grant-form">{% csrf_token %}<label for="coordinator-email">Student institute email</label><input id="coordinator-email" class="form-control" type="email" placeholder="student@iiitdmj.ac.in" required><button class="btn btn-primary" type="submit"><i class="bi bi-person-plus"></i> Grant access</button></form><p class="scheduler-empty mt-3">The student must have signed in once and must have a Student account.</p></section>
+        <section class="scheduler-management-card"><div class="scheduler-section-heading"><div><span class="ignite-eyebrow">Current permissions</span><h2>Room-booking coordinators</h2></div></div><p id="coordinators-empty" class="scheduler-empty">Loading granted access.</p><div id="coordinator-permission-list" class="scheduler-item-list"></div></section>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'js/scheduler-pages.js' %}"></script>{% endblock %}

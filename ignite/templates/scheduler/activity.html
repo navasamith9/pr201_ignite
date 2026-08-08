@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Your Scheduler Activity | Ignite{% endblock %}
+
+{% block content %}
+<section class="scheduler-page" data-scheduler-page="activity" data-role="{{ scheduler_role }}" data-student-account="{{ scheduler_is_student|yesno:'true,false' }}" data-can-book="{{ scheduler_can_book|yesno:'true,false' }}">
+    <header class="scheduler-header">
+        <div><span class="ignite-eyebrow"><i class="bi bi-clock-history"></i> LHTC Scheduler</span><h1>Your activity</h1><p>Keep track of your bookings and registrations.</p></div>
+        <a href="{% url 'scheduler' %}" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> Scheduler</a>
+    </header>
+    <div id="scheduler-message" class="alert d-none" role="status"></div>
+
+    <section class="scheduler-overview">
+        <div class="scheduler-list-panel"><div class="scheduler-section-heading"><div><span class="ignite-eyebrow">Your activity</span><h2 id="mine-heading">{% if scheduler_is_student %}Registered events{% elif scheduler_role == "admin" %}All bookings{% else %}My bookings{% endif %}</h2></div></div><p id="mine-empty" class="scheduler-empty">Loading your events.</p><div id="my-events" class="scheduler-item-list"></div></div>
+    </section>
+</section>
+
+<div class="modal fade" id="booking-editor" tabindex="-1" aria-labelledby="booking-editor-title" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><form id="booking-editor-form" class="modal-content">{% csrf_token %}<div class="modal-header"><h2 id="booking-editor-title" class="modal-title fs-5">Change booking</h2><button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button></div><div class="modal-body scheduler-form-grid"><div class="scheduler-field"><label for="edit-date">Event date</label><input id="edit-date" class="form-control" type="date" required></div><div class="scheduler-field"><label for="edit-strength">Expected attendees</label><input id="edit-strength" class="form-control" type="number" min="1" required></div><div class="scheduler-field"><label for="edit-start">Start time</label><input id="edit-start" class="form-control" type="time" required></div><div class="scheduler-field"><label for="edit-end">End time</label><input id="edit-end" class="form-control" type="time" required></div></div><div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-coreui-dismiss="modal">Close</button><button type="submit" class="btn btn-primary"><i class="bi bi-arrow-repeat"></i> Update booking</button></div></form></div></div>
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'js/scheduler-pages.js' %}"></script>{% endblock %}

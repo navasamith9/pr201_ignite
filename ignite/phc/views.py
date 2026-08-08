@@ -11,7 +11,13 @@ from .forms import AnnouncementForm, DoctorProfileForm, DoctorScheduleForm, PHCS
 from .models import AuditLog, ConsultationQueue, DoctorNotificationSubscription, DoctorProfile, PHCAnnouncement, PHCNotification, PHCSettings
 
 
-def is_admin(user): return user.is_authenticated and (user.is_staff or user.role == 'admin')
+def is_admin(user):
+    return user.is_authenticated and (
+        user.is_superuser
+        or user.is_staff
+        or user.role == 'admin'
+        or user.is_phc_admin
+    )
 def matched_doctor_for(user):
     """Resolve the doctor profile using the admin-approved email as the source of truth."""
     if not user.email:

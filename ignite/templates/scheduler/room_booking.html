@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Room Booking | Ignite{% endblock %}
+
+{% block content %}
+<section class="scheduler-page" data-scheduler-page="booking" data-role="{{ scheduler_role }}" data-can-book="{{ scheduler_can_book|yesno:'true,false' }}">
+    <header class="scheduler-header">
+        <div><span class="ignite-eyebrow"><i class="bi bi-calendar-plus"></i> LHTC Scheduler</span><h1>Room booking</h1><p>Enter your event details to find lecture halls that are free and suitable.</p></div>
+        <a href="{% url 'scheduler' %}" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> Scheduler</a>
+    </header>
+    <div id="scheduler-message" class="alert d-none" role="status"></div>
+
+    <section class="scheduler-workbench" aria-labelledby="booking-heading">
+        <div class="scheduler-form-panel">
+            <div class="scheduler-section-heading"><div><span class="ignite-eyebrow">Room booking</span><h2 id="booking-heading">Check availability</h2></div><span class="scheduler-one-day-note"><i class="bi bi-calendar-day"></i> One-day bookings</span></div>
+            <form id="scheduler-form" class="scheduler-form">
+                {% csrf_token %}
+                <div class="scheduler-form-grid">
+                    <div class="scheduler-field scheduler-field--wide"><label for="title">Event title</label><input id="title" class="form-control" maxlength="200" required></div>
+                    <div class="scheduler-field"><label for="event-type">Event type</label><select id="event-type" class="form-select"><option value="CLUB">Club event</option><option value="EXTRA_CLASS">Extra class</option><option value="EXAM">Exam</option><option value="MEETING">Meeting</option><option value="WORKSHOP">Workshop</option><option value="SEMINAR">Seminar</option><option value="OTHER">Other</option></select></div>
+                    <div class="scheduler-field"><label for="strength">Expected attendees</label><input id="strength" class="form-control" type="number" min="1" required></div>
+                    <div class="scheduler-field scheduler-field--wide"><label for="purpose">Purpose</label><input id="purpose" class="form-control" required></div>
+                    <div class="scheduler-field"><label for="event-date">Event date</label><input id="event-date" class="form-control" type="date" required></div>
+                    <div class="scheduler-field"><label for="deadline">Registration closes</label><input id="deadline" class="form-control" type="datetime-local" required></div>
+                    <div class="scheduler-field"><label for="start-time">Start time</label><input id="start-time" class="form-control" type="time" required></div>
+                    <div class="scheduler-field"><label for="end-time">End time</label><input id="end-time" class="form-control" type="time" required></div>
+                    <div class="scheduler-field"><label for="branches">Audience branches</label><input id="branches" class="form-control" placeholder="All branches"></div>
+                    <div class="scheduler-field"><label for="years">Audience years</label><input id="years" class="form-control" placeholder="All years"></div>
+                    <div class="scheduler-field scheduler-field--wide"><label for="coordinator-emails">Co-coordinator emails</label><input id="coordinator-emails" class="form-control" placeholder="Optional, comma-separated institute emails"></div>
+                </div>
+                <fieldset class="scheduler-facilities"><legend>Required facilities</legend><div class="scheduler-checks"><label><input type="checkbox" id="projector"> Projector</label><label><input type="checkbox" id="ac"> AC</label><label><input type="checkbox" id="wifi"> Wi-Fi</label><label><input type="checkbox" id="audio"> Audio system</label><label><input type="checkbox" id="smart-board"> Smart board</label></div></fieldset>
+                <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Find suitable rooms</button>
+            </form>
+        </div>
+        <aside class="scheduler-results-panel" aria-live="polite">
+            <div class="scheduler-section-heading"><div><span class="ignite-eyebrow">Recommendation</span><h2>Available rooms</h2></div><i class="bi bi-stars scheduler-heading-icon" aria-hidden="true"></i></div>
+            <p id="recommendation-empty" class="scheduler-empty">Search with an event date and times to see the best available rooms.</p>
+            <div id="recommendations" class="scheduler-item-list"></div>
+        </aside>
+    </section>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'js/scheduler-pages.js' %}"></script>{% endblock %}

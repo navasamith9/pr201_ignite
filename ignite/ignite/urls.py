@@ -23,6 +23,12 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('scheduler/', views.scheduler, name='scheduler'),
+    path('scheduler/room-booking/', views.scheduler_room_booking, name='scheduler-room-booking'),
+    path('scheduler/activity/', views.scheduler_activity, name='scheduler-activity'),
+    path('scheduler/campus-schedule/', views.scheduler_campus_schedule, name='scheduler-campus-schedule'),
+    path('scheduler/add-room/', views.scheduler_add_room, name='scheduler-add-room'),
+    path('scheduler/timetable-entries/', views.scheduler_timetable_entries, name='scheduler-timetable-entries'),
+    path('scheduler/grant-access/', views.scheduler_grant_access, name='scheduler-grant-access'),
     path('admin/', admin.site.urls),
 
     path('accounts/', include('allauth.urls')),
